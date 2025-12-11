@@ -37,3 +37,39 @@ Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'tim
 2025-12-11 18:04:56,991 ERROR frappe New Exception collected in error log
 Site: lending.localhost
 Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 19:59:33,168 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 19:59:51,007 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 20:00:14,389 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 23:53:39,801 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 23:54:31,748 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-11 23:55:42,392 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'doc': '{"docstatus":0,"doctype":"Company","name":"new-company-biqsvdgpga","__islocal":1,"__unsaved":1,"owner":"nishant202mishra@gmail.com","country":"India","is_group":1,"reporting_currency":"","create_chart_of_accounts_based_on":"","allow_account_creation_against_child_company":0,"book_advance_payments_in_separate_party_account":0,"reconcile_on_advance_payment_date":0,"reconciliation_takes_effect_on":"Oldest Of Invoice Or Advance","auto_exchange_rate_revaluation":0,"auto_err_frequency":"Daily","submit_err_jv":0,"enable_perpetual_inventory":1,"enable_item_wise_inventory_account":0,"enable_provisional_accounting_for_non_stock_items":0,"valuation_method":"FIFO","interest_day_count_convention":"Actual/365","collection_offset_logic_based_on":"NPA Flag","loan_classification_ranges":[],"irac_provisioning_configuration":[],"loan_accrual_frequency":"Daily","company_name":"somu pharma ","abbr":"sp","default_currency":"USD"}', 'action': 'Save', 'cmd': 'frappe.desk.form.save.savedocs'}
+2025-12-11 23:55:54,493 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'doc': '{"docstatus":0,"doctype":"Company","name":"new-company-biqsvdgpga","__islocal":1,"__unsaved":1,"owner":"nishant202mishra@gmail.com","country":"India","is_group":1,"reporting_currency":"","create_chart_of_accounts_based_on":"","allow_account_creation_against_child_company":0,"book_advance_payments_in_separate_party_account":0,"reconcile_on_advance_payment_date":0,"reconciliation_takes_effect_on":"Oldest Of Invoice Or Advance","auto_exchange_rate_revaluation":0,"auto_err_frequency":"Daily","submit_err_jv":0,"enable_perpetual_inventory":1,"enable_item_wise_inventory_account":0,"enable_provisional_accounting_for_non_stock_items":0,"valuation_method":"FIFO","interest_day_count_convention":"Actual/365","collection_offset_logic_based_on":"NPA Flag","loan_classification_ranges":[],"irac_provisioning_configuration":[],"loan_accrual_frequency":"Daily","company_name":"somu pharma ","abbr":"sp","default_currency":"USD"}', 'action': 'Save', 'cmd': 'frappe.desk.form.save.savedocs'}
+2025-12-11 23:57:11,103 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-12 00:01:27,623 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-12 00:02:18,699 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-12 00:15:03,064 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-12 00:23:29,875 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}

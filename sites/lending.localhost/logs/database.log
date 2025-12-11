@@ -1451,3 +1451,7 @@ ALTER TABLE `tabSales Invoice` ADD COLUMN `loan` varchar(140), ADD COLUMN `loan_
 ALTER TABLE `tabSales Invoice` ADD INDEX `value_date_index`(`value_date`)
 2025-12-11 16:43:24,401 WARNING database DDL Query made to DB:
 ALTER TABLE `tabLoan Application` ADD COLUMN `workflow_state` varchar(140)
+2025-12-11 19:46:39,902 WARNING database DDL Query made to DB:
+ALTER TABLE `tabAddress` ADD COLUMN `tax_category` varchar(140), ADD COLUMN `is_your_company_address` tinyint(4) NOT NULL DEFAULT 0
+2025-12-11 19:46:39,959 WARNING database DDL Query made to DB:
+ALTER TABLE `tabContact` ADD COLUMN `is_billing_contact` tinyint(4) NOT NULL DEFAULT 0

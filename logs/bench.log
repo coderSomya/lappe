@@ -102,3 +102,96 @@
 2025-12-11 19:36:02,648 INFO /opt/homebrew/bin/bench serve --port 8000
 2025-12-11 19:36:02,650 INFO /opt/homebrew/bin/bench schedule
 2025-12-11 19:36:02,658 INFO /opt/homebrew/bin/bench watch
+2025-12-11 19:46:37,195 INFO /opt/homebrew/bin/bench migrate
+2025-12-11 19:49:15,822 INFO /opt/homebrew/bin/bench --site lending.localhost execute hide_modules.hide_modules
+2025-12-11 19:49:30,742 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:49:52,640 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:50:02,220 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:50:12,095 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:50:24,553 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:50:30,049 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:51:11,202 INFO /opt/homebrew/bin/bench migrate
+2025-12-11 19:52:52,375 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:53:09,345 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:53:10,039 INFO /opt/homebrew/bin/bench restart
+2025-12-11 19:53:35,953 INFO /opt/homebrew/bin/bench migrate
+2025-12-11 19:54:52,315 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:55:00,319 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:55:31,348 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:55:31,918 INFO /opt/homebrew/bin/bench restart
+2025-12-11 19:56:05,321 INFO /opt/homebrew/bin/bench migrate
+2025-12-11 19:57:24,819 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:57:25,951 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:57:41,653 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:57:43,045 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:57:43,567 INFO /opt/homebrew/bin/bench --site lending.localhost clear-website-cache
+2025-12-11 19:58:02,038 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:58:03,497 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:58:04,020 INFO /opt/homebrew/bin/bench restart
+2025-12-11 19:58:16,135 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:58:25,982 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-11 19:58:30,618 INFO /opt/homebrew/bin/bench --site lending.localhost clear-cache
+2025-12-11 19:58:31,142 INFO /opt/homebrew/bin/bench restart
+2025-12-12 00:11:44,862 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:12:10,851 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:12:43,172 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:12:55,071 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:13:14,824 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:13:23,859 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:16:02,511 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:16:19,069 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:16:36,294 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:16:58,045 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:17:16,395 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:17:36,745 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:17:54,496 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:19:15,750 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:19:27,175 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:19:43,614 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:06,156 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:16,984 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:24,720 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:34,648 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:42,719 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:20:59,019 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:11,059 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:15,835 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:28,719 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:38,683 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:47,042 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:21:57,974 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:22:08,710 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:22:27,548 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:22:45,260 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:22:49,611 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:22:58,812 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:24:20,295 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:24:29,543 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:24:47,306 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:25:04,461 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:26:06,173 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:26:15,988 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:26:27,577 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:32:16,795 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:33:10,645 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:33:33,381 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:34:15,717 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:34:27,299 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:34:39,753 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:35:00,296 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:36:29,206 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:36:50,646 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:37:00,567 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:38:56,772 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:42:24,211 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:42:44,361 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:42:54,139 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:09,409 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:18,316 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:19,927 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:27,967 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:28,983 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:39,396 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:43:55,732 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:44:06,779 INFO /opt/homebrew/bin/bench --site lending.localhost console
+2025-12-12 00:44:17,246 INFO /opt/homebrew/bin/bench --site lending.localhost console

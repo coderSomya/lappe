@@ -1,104 +1,383 @@
-2025-12-11 16:50:14,132 INFO ipython === bench console session ===
-2025-12-11 16:50:14,132 INFO ipython import frappe
-
-# 1. Create the Company
-if not frappe.db.exists("Company", "My Lending Co"):
-    company = frappe.get_doc({
-        "doctype": "Company",
-        "company_name": "My Lending Co",
-        "abbr": "MLC",
-        "default_currency": "INR",
-        "country": "India"
-    })
-    company.insert()
-    frappe.db.commit()
-    print("✅ Company Created")
+2025-12-12 00:42:45,104 INFO ipython print(f"Monthly Repayment: {loan.monthly_repayment_amount}")
+2025-12-12 00:42:45,104 INFO ipython # Create Loan Repayment
+2025-12-12 00:42:45,104 INFO ipython loan_repayment = frappe.new_doc("Loan Repayment")
+2025-12-12 00:42:45,104 INFO ipython loan_repayment.against_loan = loan_name
+2025-12-12 00:42:45,104 INFO ipython loan_repayment.posting_date = frappe.utils.now()
+2025-12-12 00:42:45,104 INFO ipython loan_repayment.value_date = frappe.utils.today()
+2025-12-12 00:42:45,104 INFO ipython # Set repayment type
+2025-12-12 00:42:45,104 INFO ipython loan_repayment.repayment_type = "Normal Repayment"
+2025-12-12 00:42:45,104 INFO ipython # Set amount paid - using monthly repayment amount
+2025-12-12 00:42:45,104 INFO ipython if loan.monthly_repayment_amount:
+    loan_repayment.amount_paid = loan.monthly_repayment_amount
 else:
-    print("ℹ️ Company already exists")
-
-# 2. Create Required Bank & Loan Accounts
-accounts = [
-    {"name": "Disbursement Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Repayment Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Loan Assets", "parent": "Current Assets - MLC", "type": "Receivable"},
-    {"name": "Interest Income", "parent": "Direct Income - MLC", "type": "Income"},
-    {"name": "Penalty Income", "parent": "Direct Income - MLC", "type": "Income"}
-]
-
-for acc in accounts:
-    if not frappe.db.exists("Account", acc["name"] + " - MLC"):
-        try:
-            new_acc = frappe.get_doc({
-                "doctype": "Account",
-                "account_name": acc["name"],
-                "parent_account": acc["parent"],
-                "company": "My Lending Co",
-                "account_type": acc["type"],
-                "currency": "INR"
-            })
-            new_acc.insert()
-            print(f"✅ Created Account: {acc['name']}")
-        except Exception as e:
-            print(f"⚠️ Could not create {acc['name']} (Parent might be missing)")
+    # If no monthly amount, use a reasonable amount (e.g., 10% of loan)
+    loan_repayment.amount_paid = loan.loan_amount * 0.1
+2025-12-12 00:42:45,105 INFO ipython # Set cost center if available
+2025-12-12 00:42:45,105 INFO ipython if loan.cost_center:
+    loan_repayment.cost_center = loan.cost_center
+2025-12-12 00:42:45,105 INFO ipython # Set mode of payment (optional)
+2025-12-12 00:42:45,105 INFO ipython modes = frappe.get_all("Mode of Payment", limit=1)
+2025-12-12 00:42:45,105 INFO ipython if modes:
+    loan_repayment.mode_of_payment = modes[0].name
+2025-12-12 00:42:45,105 INFO ipython # Reference information
+2025-12-12 00:42:45,105 INFO ipython loan_repayment.reference_date = frappe.utils.today()
+2025-12-12 00:42:45,105 INFO ipython loan_repayment.reference_number = f"REP-{loan.name}-001"
+2025-12-12 00:42:45,105 INFO ipython # Manual remarks
+2025-12-12 00:42:45,105 INFO ipython loan_repayment.manual_remarks = "First monthly repayment installment"
+2025-12-12 00:42:45,105 INFO ipython try:
+    loan_repayment.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Repayment: {loan_repayment.name}")
+    print(f"   Against Loan: {loan_repayment.against_loan}")
+    print(f"   Posting Date: {loan_repayment.posting_date}")
+    print(f"   Value Date: {loan_repayment.value_date}")
+    print(f"   Amount Paid: {loan_repayment.amount_paid}")
+    print(f"   Repayment Type: {loan_repayment.repayment_type}")
+    print(f"   Company: {loan_repayment.company}")
+    print(f"   Applicant: {loan_repayment.applicant}")
+    print(f"   Reference Number: {loan_repayment.reference_number}")
+    print(f"   Status: {loan_repayment.status}")
+    print(f"   URL: /app/loan-repayment/{loan_repayment.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan repayment: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:42:45,105 INFO ipython frappe.db.close()
+2025-12-12 00:42:45,105 INFO ipython === session end ===
+2025-12-12 00:42:54,669 INFO ipython === bench console session ===
+2025-12-12 00:42:54,669 INFO ipython import frappe
+2025-12-12 00:42:54,669 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:42:54,669 INFO ipython frappe.connect()
+2025-12-12 00:42:54,669 INFO ipython # Check Company settings
+2025-12-12 00:42:54,669 INFO ipython company = frappe.get_doc("Company", "My Lending Co")
+2025-12-12 00:42:54,669 INFO ipython print(f"Company: {company.name}")
+2025-12-12 00:42:54,669 INFO ipython print(f"Collection Offset Sequence: {company.get('collection_offset_sequence_for_standard_asset', 'Not set')}")
+2025-12-12 00:42:54,669 INFO ipython # Check Loan Product settings
+2025-12-12 00:42:54,669 INFO ipython loan_product = frappe.get_doc("Loan Product", "LP-001")
+2025-12-12 00:42:54,669 INFO ipython print(f"\nLoan Product: {loan_product.name}")
+2025-12-12 00:42:54,669 INFO ipython print(f"Collection Offset Sequence: {loan_product.get('collection_offset_sequence_for_standard_asset', 'Not set')}")
+2025-12-12 00:42:54,669 INFO ipython # Check if Collection Offset Sequence doctype exists
+2025-12-12 00:42:54,669 INFO ipython if frappe.db.exists("DocType", "Collection Offset Sequence"):
+    sequences = frappe.get_all("Collection Offset Sequence", limit=5)
+    print(f"\nAvailable Collection Offset Sequences: {len(sequences)}")
+    if sequences:
+        for seq in sequences:
+            print(f"  - {seq.name}")
+    else:
+        print("  No sequences found - need to create one")
+else:
+    print("\nCollection Offset Sequence doctype does not exist")
+2025-12-12 00:42:54,669 INFO ipython frappe.db.close()
+2025-12-12 00:42:54,669 INFO ipython === session end ===
+2025-12-12 00:43:10,083 INFO ipython === bench console session ===
+2025-12-12 00:43:10,084 INFO ipython import frappe
+2025-12-12 00:43:10,084 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:10,084 INFO ipython frappe.connect()
+2025-12-12 00:43:10,084 INFO ipython # Check if Loan Demand Offset Order exists
+2025-12-12 00:43:10,084 INFO ipython if frappe.db.exists("DocType", "Loan Demand Offset Order"):
+    orders = frappe.get_all("Loan Demand Offset Order", limit=5)
+    print(f"Existing Loan Demand Offset Orders: {len(orders)}")
+    if orders:
+        order_name = orders[0].name
+        print(f"Using existing: {order_name}")
+    else:
+        # Create one
+        order = frappe.new_doc("Loan Demand Offset Order")
+        order.title = "Standard Loan Demand Offset Order"
+        order.append("components", {"demand_type": "Penalty"})
+        order.append("components", {"demand_type": "Interest"})
+        order.append("components", {"demand_type": "Principal"})
+        order.insert(ignore_permissions=True)
+        order_name = order.name
+        frappe.db.commit()
+        print(f"Created: {order_name}")
     
-frappe.db.commit()
-print("🎉 Setup Complete!")
-2025-12-11 16:50:14,132 INFO ipython import frappe
-
-# --- STEP 1: FIX THE MISSING DATA ---
-# We need to create 'Warehouse Types' manually so the Company creation doesn't crash
-required_types = ["Transit", "Store", "Finished Goods", "Work In Progress"]
-for type_name in required_types:
-    if not frappe.db.exists("Warehouse Type", type_name):
-        frappe.get_doc({
-            "doctype": "Warehouse Type",
-            "name": type_name
-        }).insert(ignore_permissions=True)
-        print(f"🛠️  Fixed missing data: {type_name}")
-
-frappe.db.commit()
-
-# --- STEP 2: CREATE THE COMPANY ---
-if not frappe.db.exists("Company", "My Lending Co"):
-    company = frappe.get_doc({
-        "doctype": "Company",
-        "company_name": "My Lending Co",
-        "abbr": "MLC",
-        "default_currency": "INR",
-        "country": "India"
-    })
-    company.insert()
-    frappe.db.commit()
-    print("✅ Company Created: My Lending Co")
+2025-12-12 00:43:10,084 INFO ipython     # Set in Company
+2025-12-12 00:43:10,084 INFO ipython     company = frappe.get_doc("Company", "My Lending Co")
+2025-12-12 00:43:10,084 INFO ipython     if not company.get("collection_offset_sequence_for_standard_asset"):
+        company.collection_offset_sequence_for_standard_asset = order_name
+        company.save(ignore_permissions=True)
+        frappe.db.commit()
+        print(f"✅ Set Collection Offset Sequence in Company")
+    else:
+        print(f"✅ Company already has Collection Offset Sequence set")
 else:
-    print("ℹ️  Company already exists")
-
-# --- STEP 3: CREATE THE ACCOUNTS ---
-accounts = [
-    {"name": "Disbursement Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Repayment Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Loan Assets", "parent": "Current Assets - MLC", "type": "Receivable"},
-    {"name": "Interest Income", "parent": "Direct Income - MLC", "type": "Income"},
-    {"name": "Penalty Income", "parent": "Direct Income - MLC", "type": "Income"}
-]
-
-for acc in accounts:
-    if not frappe.db.exists("Account", acc["name"] + " - MLC"):
-        try:
-            new_acc = frappe.get_doc({
-                "doctype": "Account",
-                "account_name": acc["name"],
-                "parent_account": acc["parent"],
-                "company": "My Lending Co",
-                "account_type": acc["type"],
-                "currency": "INR"
-            })
-            new_acc.insert()
-            print(f"✅ Created Account: {acc['name']}")
-        except Exception as e:
-            # If parent account is missing, we skip (it might be named differently in your version)
-            print(f"⚠️  Skipped {acc['name']} (Parent account check required)")
-
-frappe.db.commit()
-print("🎉 SETUP COMPLETE! Type 'exit' to leave.")
-2025-12-11 16:50:14,132 INFO ipython === session end ===
+    print("❌ Loan Demand Offset Order doctype does not exist")
+2025-12-12 00:43:10,084 INFO ipython frappe.db.close()
+2025-12-12 00:43:10,084 INFO ipython === session end ===
+2025-12-12 00:43:19,171 INFO ipython === bench console session ===
+2025-12-12 00:43:19,172 INFO ipython import frappe
+2025-12-12 00:43:19,172 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:19,172 INFO ipython frappe.connect()
+2025-12-12 00:43:19,172 INFO ipython # Get or create Loan Demand Offset Order
+2025-12-12 00:43:19,172 INFO ipython orders = frappe.get_all("Loan Demand Offset Order", limit=1)
+2025-12-12 00:43:19,172 INFO ipython if orders:
+    order_name = orders[0].name
+    print(f"Using existing order: {order_name}")
+else:
+    order = frappe.new_doc("Loan Demand Offset Order")
+    order.title = "Standard Loan Demand Offset Order"
+    order.append("components", {"demand_type": "Penalty"})
+    order.append("components", {"demand_type": "Interest"})
+    order.append("components", {"demand_type": "Principal"})
+    order.insert(ignore_permissions=True)
+    order_name = order.name
+    frappe.db.commit()
+    print(f"Created order: {order_name}")
+2025-12-12 00:43:19,172 INFO ipython # Set in Company
+2025-12-12 00:43:19,172 INFO ipython company = frappe.get_doc("Company", "My Lending Co")
+2025-12-12 00:43:19,172 INFO ipython if not company.get("collection_offset_sequence_for_standard_asset"):
+    company.collection_offset_sequence_for_standard_asset = order_name
+    company.save(ignore_permissions=True)
+    frappe.db.commit()
+    print(f"✅ Set Collection Offset Sequence in Company: {order_name}")
+else:
+    print(f"✅ Company already has Collection Offset Sequence: {company.collection_offset_sequence_for_standard_asset}")
+2025-12-12 00:43:19,172 INFO ipython frappe.db.close()
+2025-12-12 00:43:19,172 INFO ipython === session end ===
+2025-12-12 00:43:20,391 INFO ipython === bench console session ===
+2025-12-12 00:43:20,391 INFO ipython import frappe
+2025-12-12 00:43:20,391 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:20,391 INFO ipython frappe.connect()
+2025-12-12 00:43:20,391 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:43:20,391 INFO ipython # Get loan details
+2025-12-12 00:43:20,391 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:43:20,391 INFO ipython print(f"Using Loan: {loan.name}")
+2025-12-12 00:43:20,391 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:43:20,391 INFO ipython print(f"Monthly Repayment: {loan.monthly_repayment_amount}")
+2025-12-12 00:43:20,391 INFO ipython # Create Loan Repayment
+2025-12-12 00:43:20,391 INFO ipython loan_repayment = frappe.new_doc("Loan Repayment")
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.against_loan = loan_name
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.posting_date = frappe.utils.now()
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.value_date = frappe.utils.today()
+2025-12-12 00:43:20,391 INFO ipython # Set repayment type
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.repayment_type = "Normal Repayment"
+2025-12-12 00:43:20,391 INFO ipython # Set amount paid - using monthly repayment amount
+2025-12-12 00:43:20,391 INFO ipython if loan.monthly_repayment_amount:
+    loan_repayment.amount_paid = loan.monthly_repayment_amount
+else:
+    # If no monthly amount, use a reasonable amount (e.g., 10% of loan)
+    loan_repayment.amount_paid = loan.loan_amount * 0.1
+2025-12-12 00:43:20,391 INFO ipython # Set cost center if available
+2025-12-12 00:43:20,391 INFO ipython if loan.cost_center:
+    loan_repayment.cost_center = loan.cost_center
+2025-12-12 00:43:20,391 INFO ipython # Set mode of payment (optional)
+2025-12-12 00:43:20,391 INFO ipython modes = frappe.get_all("Mode of Payment", limit=1)
+2025-12-12 00:43:20,391 INFO ipython if modes:
+    loan_repayment.mode_of_payment = modes[0].name
+2025-12-12 00:43:20,391 INFO ipython # Reference information
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.reference_date = frappe.utils.today()
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.reference_number = f"REP-{loan.name}-001"
+2025-12-12 00:43:20,391 INFO ipython # Manual remarks
+2025-12-12 00:43:20,391 INFO ipython loan_repayment.manual_remarks = "First monthly repayment installment"
+2025-12-12 00:43:20,391 INFO ipython try:
+    loan_repayment.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Repayment: {loan_repayment.name}")
+    print(f"   Against Loan: {loan_repayment.against_loan}")
+    print(f"   Posting Date: {loan_repayment.posting_date}")
+    print(f"   Value Date: {loan_repayment.value_date}")
+    print(f"   Amount Paid: {loan_repayment.amount_paid}")
+    print(f"   Repayment Type: {loan_repayment.repayment_type}")
+    print(f"   Company: {loan_repayment.company}")
+    print(f"   Applicant: {loan_repayment.applicant}")
+    print(f"   Reference Number: {loan_repayment.reference_number}")
+    print(f"   Status: {loan_repayment.status}")
+    print(f"   URL: /app/loan-repayment/{loan_repayment.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan repayment: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:43:20,391 INFO ipython frappe.db.close()
+2025-12-12 00:43:20,391 INFO ipython === session end ===
+2025-12-12 00:43:28,343 INFO ipython === bench console session ===
+2025-12-12 00:43:28,343 INFO ipython import frappe
+2025-12-12 00:43:28,343 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:28,343 INFO ipython frappe.connect()
+2025-12-12 00:43:28,343 INFO ipython # Get order
+2025-12-12 00:43:28,343 INFO ipython order = frappe.get_doc("Loan Demand Offset Order", "Standard Loan Demand Offset Order")
+2025-12-12 00:43:28,343 INFO ipython print(f"Order: {order.name}")
+2025-12-12 00:43:28,343 INFO ipython # Set directly in Company using db.set_value to bypass validation
+2025-12-12 00:43:28,343 INFO ipython frappe.db.set_value("Company", "My Lending Co", "collection_offset_sequence_for_standard_asset", order.name)
+2025-12-12 00:43:28,343 INFO ipython frappe.db.commit()
+2025-12-12 00:43:28,343 INFO ipython print(f"✅ Set Collection Offset Sequence in Company using db.set_value")
+2025-12-12 00:43:28,343 INFO ipython # Verify
+2025-12-12 00:43:28,344 INFO ipython company = frappe.get_doc("Company", "My Lending Co")
+2025-12-12 00:43:28,344 INFO ipython print(f"Verified: {company.collection_offset_sequence_for_standard_asset}")
+2025-12-12 00:43:28,344 INFO ipython frappe.db.close()
+2025-12-12 00:43:28,344 INFO ipython === session end ===
+2025-12-12 00:43:29,470 INFO ipython === bench console session ===
+2025-12-12 00:43:29,470 INFO ipython import frappe
+2025-12-12 00:43:29,470 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:29,470 INFO ipython frappe.connect()
+2025-12-12 00:43:29,470 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:43:29,470 INFO ipython # Get loan details
+2025-12-12 00:43:29,470 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:43:29,470 INFO ipython print(f"Using Loan: {loan.name}")
+2025-12-12 00:43:29,470 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:43:29,470 INFO ipython print(f"Monthly Repayment: {loan.monthly_repayment_amount}")
+2025-12-12 00:43:29,470 INFO ipython # Create Loan Repayment
+2025-12-12 00:43:29,470 INFO ipython loan_repayment = frappe.new_doc("Loan Repayment")
+2025-12-12 00:43:29,470 INFO ipython loan_repayment.against_loan = loan_name
+2025-12-12 00:43:29,470 INFO ipython loan_repayment.posting_date = frappe.utils.now()
+2025-12-12 00:43:29,471 INFO ipython loan_repayment.value_date = frappe.utils.today()
+2025-12-12 00:43:29,471 INFO ipython # Set repayment type
+2025-12-12 00:43:29,471 INFO ipython loan_repayment.repayment_type = "Normal Repayment"
+2025-12-12 00:43:29,471 INFO ipython # Set amount paid - using monthly repayment amount
+2025-12-12 00:43:29,471 INFO ipython if loan.monthly_repayment_amount:
+    loan_repayment.amount_paid = loan.monthly_repayment_amount
+else:
+    # If no monthly amount, use a reasonable amount (e.g., 10% of loan)
+    loan_repayment.amount_paid = loan.loan_amount * 0.1
+2025-12-12 00:43:29,471 INFO ipython # Set cost center if available
+2025-12-12 00:43:29,471 INFO ipython if loan.cost_center:
+    loan_repayment.cost_center = loan.cost_center
+2025-12-12 00:43:29,471 INFO ipython # Set mode of payment (optional)
+2025-12-12 00:43:29,471 INFO ipython modes = frappe.get_all("Mode of Payment", limit=1)
+2025-12-12 00:43:29,471 INFO ipython if modes:
+    loan_repayment.mode_of_payment = modes[0].name
+2025-12-12 00:43:29,471 INFO ipython # Reference information
+2025-12-12 00:43:29,471 INFO ipython loan_repayment.reference_date = frappe.utils.today()
+2025-12-12 00:43:29,471 INFO ipython loan_repayment.reference_number = f"REP-{loan.name}-001"
+2025-12-12 00:43:29,471 INFO ipython # Manual remarks
+2025-12-12 00:43:29,471 INFO ipython loan_repayment.manual_remarks = "First monthly repayment installment"
+2025-12-12 00:43:29,471 INFO ipython try:
+    loan_repayment.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Repayment: {loan_repayment.name}")
+    print(f"   Against Loan: {loan_repayment.against_loan}")
+    print(f"   Posting Date: {loan_repayment.posting_date}")
+    print(f"   Value Date: {loan_repayment.value_date}")
+    print(f"   Amount Paid: {loan_repayment.amount_paid}")
+    print(f"   Repayment Type: {loan_repayment.repayment_type}")
+    print(f"   Company: {loan_repayment.company}")
+    print(f"   Applicant: {loan_repayment.applicant}")
+    print(f"   Reference Number: {loan_repayment.reference_number}")
+    print(f"   Status: {loan_repayment.status}")
+    print(f"   URL: /app/loan-repayment/{loan_repayment.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan repayment: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:43:29,471 INFO ipython frappe.db.close()
+2025-12-12 00:43:29,471 INFO ipython === session end ===
+2025-12-12 00:43:40,148 INFO ipython === bench console session ===
+2025-12-12 00:43:40,149 INFO ipython import frappe
+2025-12-12 00:43:40,149 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:40,149 INFO ipython frappe.connect()
+2025-12-12 00:43:40,149 INFO ipython loan_repayment = frappe.get_doc("Loan Repayment", "LM-REP-0001")
+2025-12-12 00:43:40,149 INFO ipython print(f"\n✅ Loan Repayment Details:")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Name: {loan_repayment.name}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Against Loan: {loan_repayment.against_loan}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Company: {loan_repayment.company}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Applicant: {loan_repayment.applicant} ({loan_repayment.applicant_type})")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Posting Date: {loan_repayment.posting_date}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Value Date: {loan_repayment.value_date}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Amount Paid: {loan_repayment.amount_paid}")
+2025-12-12 00:43:40,149 INFO ipython print(f"   Repayment Type: {loan_repayment.repayment_type}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Interest Payable: {loan_repayment.interest_payable}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Payable Amount: {loan_repayment.payable_amount}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Pending Principal Amount: {loan_repayment.pending_principal_amount}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Reference Number: {loan_repayment.reference_number}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Reference Date: {loan_repayment.reference_date}")
+2025-12-12 00:43:40,150 INFO ipython print(f"   Manual Remarks: {loan_repayment.manual_remarks}")
+2025-12-12 00:43:40,150 INFO ipython if loan_repayment.cost_center:
+    print(f"   Cost Center: {loan_repayment.cost_center}")
+if loan_repayment.mode_of_payment:
+    print(f"   Mode of Payment: {loan_repayment.mode_of_payment}")
+print(f"\n   Access URL: http://lending.localhost:8000/app/loan-repayment/{loan_repayment.name}")
+2025-12-12 00:43:40,150 INFO ipython frappe.db.close()
+2025-12-12 00:43:40,150 INFO ipython === session end ===
+2025-12-12 00:43:56,204 INFO ipython === bench console session ===
+2025-12-12 00:43:56,205 INFO ipython import frappe
+2025-12-12 00:43:56,205 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:43:56,205 INFO ipython frappe.connect()
+2025-12-12 00:43:56,205 INFO ipython # Find the repayment
+2025-12-12 00:43:56,205 INFO ipython repayments = frappe.get_all("Loan Repayment", 
+    filters={"against_loan": "ACC-LOAN-2025-00001"},
+    fields=["name", "amount_paid", "posting_date"],
+    limit=5
+)
+2025-12-12 00:43:56,205 INFO ipython print(f"Loan Repayments found: {len(repayments)}")
+2025-12-12 00:43:56,205 INFO ipython for r in repayments:
+    print(f"  - {r.name}: {r.amount_paid} on {r.posting_date}")
+2025-12-12 00:43:56,205 INFO ipython if repayments:
+    loan_repayment = frappe.get_doc("Loan Repayment", repayments[0].name)
+    print(f"\n✅ Loan Repayment Details:")
+    print(f"   Name: {loan_repayment.name}")
+    print(f"   Against Loan: {loan_repayment.against_loan}")
+    print(f"   Company: {loan_repayment.company}")
+    print(f"   Applicant: {loan_repayment.applicant} ({loan_repayment.applicant_type})")
+    print(f"   Posting Date: {loan_repayment.posting_date}")
+    print(f"   Value Date: {loan_repayment.value_date}")
+    print(f"   Amount Paid: {loan_repayment.amount_paid}")
+    print(f"   Repayment Type: {loan_repayment.repayment_type}")
+    print(f"   Interest Payable: {loan_repayment.interest_payable}")
+    print(f"   Payable Amount: {loan_repayment.payable_amount}")
+    print(f"   Pending Principal Amount: {loan_repayment.pending_principal_amount}")
+    print(f"   Reference Number: {loan_repayment.reference_number}")
+    print(f"   Reference Date: {loan_repayment.reference_date}")
+    print(f"   Manual Remarks: {loan_repayment.manual_remarks}")
+    if loan_repayment.cost_center:
+        print(f"   Cost Center: {loan_repayment.cost_center}")
+    if loan_repayment.mode_of_payment:
+        print(f"   Mode of Payment: {loan_repayment.mode_of_payment}")
+    print(f"\n   Access URL: http://lending.localhost:8000/app/loan-repayment/{loan_repayment.name}")
+2025-12-12 00:43:56,205 INFO ipython frappe.db.close()
+2025-12-12 00:43:56,205 INFO ipython === session end ===
+2025-12-12 00:44:07,484 INFO ipython === bench console session ===
+2025-12-12 00:44:07,484 INFO ipython import frappe
+2025-12-12 00:44:07,484 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:44:07,484 INFO ipython frappe.connect()
+2025-12-12 00:44:07,484 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:44:07,485 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:44:07,485 INFO ipython # Create Loan Repayment with minimal required fields
+2025-12-12 00:44:07,485 INFO ipython loan_repayment = frappe.new_doc("Loan Repayment")
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.against_loan = loan_name
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.posting_date = frappe.utils.now()
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.value_date = frappe.utils.today()
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.repayment_type = "Normal Repayment"
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.amount_paid = 8885.0  # Monthly repayment amount
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.reference_number = "REP-001"
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.reference_date = frappe.utils.today()
+2025-12-12 00:44:07,485 INFO ipython loan_repayment.manual_remarks = "First monthly repayment installment"
+2025-12-12 00:44:07,485 INFO ipython try:
+    loan_repayment.insert(ignore_permissions=True)
+    print(f"✅ Created Loan Repayment: {loan_repayment.name}")
+    print(f"   Against Loan: {loan_repayment.against_loan}")
+    print(f"   Amount Paid: {loan_repayment.amount_paid}")
+    print(f"   Posting Date: {loan_repayment.posting_date}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:44:07,485 INFO ipython frappe.db.close()
+2025-12-12 00:44:07,485 INFO ipython === session end ===
+2025-12-12 00:44:17,839 INFO ipython === bench console session ===
+2025-12-12 00:44:17,839 INFO ipython import frappe
+2025-12-12 00:44:17,839 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:44:17,839 INFO ipython frappe.connect()
+2025-12-12 00:44:17,839 INFO ipython loan_repayment = frappe.get_doc("Loan Repayment", "LM-REP-0001")
+2025-12-12 00:44:17,840 INFO ipython print(f"\n✅ Loan Repayment Details:")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Name: {loan_repayment.name}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Against Loan: {loan_repayment.against_loan}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Company: {loan_repayment.company}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Applicant: {loan_repayment.applicant} ({loan_repayment.applicant_type})")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Posting Date: {loan_repayment.posting_date}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Value Date: {loan_repayment.value_date}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Amount Paid: {loan_repayment.amount_paid}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Repayment Type: {loan_repayment.repayment_type}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Interest Payable: {loan_repayment.interest_payable}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Payable Amount: {loan_repayment.payable_amount}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Pending Principal Amount: {loan_repayment.pending_principal_amount}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Reference Number: {loan_repayment.reference_number}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Reference Date: {loan_repayment.reference_date}")
+2025-12-12 00:44:17,840 INFO ipython print(f"   Manual Remarks: {loan_repayment.manual_remarks}")
+2025-12-12 00:44:17,840 INFO ipython if loan_repayment.cost_center:
+    print(f"   Cost Center: {loan_repayment.cost_center}")
+if loan_repayment.mode_of_payment:
+    print(f"   Mode of Payment: {loan_repayment.mode_of_payment}")
+print(f"\n   Access URL: http://lending.localhost:8000/app/loan-repayment/{loan_repayment.name}")
+2025-12-12 00:44:17,840 INFO ipython frappe.db.close()
+2025-12-12 00:44:17,840 INFO ipython === session end ===
