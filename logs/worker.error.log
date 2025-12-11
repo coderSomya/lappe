@@ -546,3 +546,4 @@ Traceback (most recent call last):
   File "/Users/prom3/frappe-bench/apps/frappe/frappe/database/__init__.py", line 79, in get_db
 ModuleNotFoundError: No module named 'frappe.database.mariadb.mysqlclient'
 
+/Users/prom3/Desktop/regal/frappe-bench/env/bin/python: Error while finding module specification for 'frappe.utils.bench_helper' (ModuleNotFoundError: No module named 'frappe')

@@ -77,3 +77,28 @@
 2025-12-11 16:59:26,490 INFO /opt/homebrew/bin/bench use lending.localhost
 2025-12-11 17:03:25,780 INFO /opt/homebrew/bin/bench --site lending.localhost set-admin-password admin
 2025-12-11 18:00:00,808 INFO /opt/homebrew/bin/bench --verbose --site all backup
+2025-12-11 19:32:00,097 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:32:46,898 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:33:00,956 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:33:06,966 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:33:07,204 INFO /opt/homebrew/bin/bench watch
+2025-12-11 19:33:07,206 INFO /opt/homebrew/bin/bench serve --port 8000
+2025-12-11 19:33:07,209 INFO /opt/homebrew/bin/bench schedule
+2025-12-11 19:33:07,209 INFO /opt/homebrew/bin/bench worker
+2025-12-11 19:34:08,136 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:34:17,654 INFO /opt/homebrew/bin/bench stop
+2025-12-11 19:35:55,317 INFO /opt/homebrew/bin/bench setup requirements
+2025-12-11 19:35:55,320 DEBUG /Users/prom3/Desktop/regal/frappe-bench/env/bin/python -m pip install --quiet --upgrade pip
+2025-12-11 19:35:55,959 LOG Installing frappe
+2025-12-11 19:35:55,996 DEBUG cd /Users/prom3/Desktop/regal/frappe-bench && /Users/prom3/Desktop/regal/frappe-bench/env/bin/python -m pip install --quiet --upgrade -e /Users/prom3/Desktop/regal/frappe-bench/apps/frappe 
+2025-12-11 19:35:57,491 DEBUG cd /Users/prom3/Desktop/regal/frappe-bench/apps/frappe && yarn install --check-files
+2025-12-11 19:35:58,263 LOG Installing lending
+2025-12-11 19:35:58,263 DEBUG cd /Users/prom3/Desktop/regal/frappe-bench && /Users/prom3/Desktop/regal/frappe-bench/env/bin/python -m pip install --quiet --upgrade -e /Users/prom3/Desktop/regal/frappe-bench/apps/lending 
+2025-12-11 19:35:59,137 LOG Installing erpnext
+2025-12-11 19:35:59,137 DEBUG cd /Users/prom3/Desktop/regal/frappe-bench && /Users/prom3/Desktop/regal/frappe-bench/env/bin/python -m pip install --quiet --upgrade -e /Users/prom3/Desktop/regal/frappe-bench/apps/erpnext 
+2025-12-11 19:36:00,350 DEBUG cd /Users/prom3/Desktop/regal/frappe-bench/apps/erpnext && yarn install --check-files
+2025-12-11 19:36:02,406 INFO /opt/homebrew/bin/bench start
+2025-12-11 19:36:02,644 INFO /opt/homebrew/bin/bench worker
+2025-12-11 19:36:02,648 INFO /opt/homebrew/bin/bench serve --port 8000
+2025-12-11 19:36:02,650 INFO /opt/homebrew/bin/bench schedule
+2025-12-11 19:36:02,658 INFO /opt/homebrew/bin/bench watch
