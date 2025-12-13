@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Deployment Guide - Frappe Lending System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            margin: -40px -40px 40px -40px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .credentials-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .credentials-box h2 {
+            color: #856404;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .credential-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .credential-item strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .credential-item code {
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+            word-break: break-all;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .architecture {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .header {
+                margin: -20px -20px 20px -20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Deployment Guide</h1>
+            <p>Complete Guide for Deploying Frappe + MariaDB + Lending App + API Server</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">For DevOps Team</p>
+        </div>
+
+        <!-- CREDENTIALS SECTION -->
+        <div class="credentials-box">
+            <h2>🔐 CRITICAL CREDENTIALS - KEEP SECURE</h2>
+            
+            <div class="credential-item">
+                <strong>Local MariaDB Database:</strong>
+                <code>Database: _af6374d4ed93f504</code><br>
+                <code>User: _af6374d4ed93f504</code><br>
+                <code>Password: zTmiKxBrhzpoetXi</code><br>
+                <code>Host: 127.0.0.1</code><br>
+                <code>Port: 3306</code>
+            </div>
+            
+            <div class="credential-item">
+                <strong>Frappe Site Configuration:</strong>
+                <code>Site Name: lending.localhost</code><br>
+                <code>Database Name: _af6374d4ed93f504</code><br>
+                <code>Database Password: zTmiKxBrhzpoetXi</code><br>
+                <code>Database User: _af6374d4ed93f504</code><br>
+                <code>Encryption Key: jIwCPOgIRn0oEUmS09wmDXEujy4vFykRqcfBm7y_WmA=</code>
+            </div>
+            
+            <div class="credential-item">
+                <strong>Frappe API Credentials:</strong>
+                <code>API Key: 64726967de821d4</code><br>
+                <code>API Secret: 18fe12924de8f23</code><br>
+                <code>Base URL: http://127.0.0.1:8000</code><br>
+                <code>Site Name: lending.localhost</code>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ IMPORTANT:</strong> These credentials are for local development. 
+                You MUST create new secure credentials for AWS production environment!
+            </div>
+        </div>
+
+        <!-- AWS HOSTING GUIDE -->
+        <h2>📋 AWS Hosting Complete Guide</h2>
+        
+        <div class="info-box">
+            <strong>📌 Prerequisites:</strong>
+            <ul>
+                <li>AWS Account</li>
+                <li>AWS CLI installed (optional but helpful)</li>
+                <li>Domain name (optional, can use IP initially)</li>
+                <li>SSH key pair for EC2</li>
+            </ul>
+        </div>
+
+        <h3>🏗️ Architecture Overview</h3>
+        <div class="architecture">┌─────────────────────────────────────────────────────────────┐
+│                         AWS Cloud                            │
+│                                                              │
+│  ┌──────────────────┐         ┌──────────────────┐         │
+│  │   AWS RDS        │         │   EC2 Instance   │         │
+│  │   (MariaDB)      │◄────────┤   (Frappe + API)  │         │
+│  │   Port: 3306     │         │   Port: 8000,5001 │         │
+│  └──────────────────┘         └──────────────────┘         │
+│                                                              │
+│         ┌──────────────────────────────────────┐           │
+│         │   Application Load Balancer (Optional) │           │
+│         │   Port: 80, 443                       │           │
+│         └──────────────────────────────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │   Your Clients  │
+                    └─────────────────┘</div>
+
+        <h3><span class="step-number">1</span> Create AWS RDS MariaDB Instance</h3>
+        
+        <h4>1.1 Create RDS Database</h4>
+        <ol>
+            <li><strong>Go to AWS Console</strong> → RDS → Create database</li>
+            <li><strong>Database Configuration:</strong>
+                <ul>
+                    <li><strong>Engine:</strong> MariaDB</li>
+                    <li><strong>Version:</strong> 10.11 or latest</li>
+                    <li><strong>Template:</strong> Production (or Dev/Test for testing)</li>
+                    <li><strong>DB instance identifier:</strong> <code>frappe-lending-db</code></li>
+                    <li><strong>Master username:</strong> <code>frappe_admin</code></li>
+                    <li><strong>Master password:</strong> <code>[Create strong password - save it!]</code></li>
+                    <li><strong>DB instance class:</strong> <code>db.t3.medium</code> (2 vCPU, 4GB RAM)</li>
+                    <li><strong>Storage:</strong>
+                        <ul>
+                            <li>Type: General Purpose SSD (gp3)</li>
+                            <li>Allocated storage: 20 GB</li>
+                            <li>Enable storage autoscaling: Yes</li>
+                            <li>Maximum storage threshold: 100 GB</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Connectivity:</strong>
+                <ul>
+                    <li><strong>VPC:</strong> Default VPC (or create new)</li>
+                    <li><strong>Subnet group:</strong> default</li>
+                    <li><strong>Public access:</strong> Yes (for initial setup, change later)</li>
+                    <li><strong>VPC security group:</strong> Create new
+                        <ul>
+                            <li>Name: <code>frappe-rds-sg</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Availability Zone:</strong> No preference</li>
+                    <li><strong>Database port:</strong> 3306</li>
+                </ul>
+            </li>
+            <li><strong>Database authentication:</strong> Password authentication</li>
+            <li><strong>Additional configuration:</strong>
+                <ul>
+                    <li><strong>Initial database name:</strong> <code>frappe_lending</code></li>
+                    <li><strong>Backup retention:</strong> 7 days</li>
+                    <li><strong>Enable encryption:</strong> Yes (recommended)</li>
+                </ul>
+            </li>
+            <li><strong>Click "Create database"</strong> (takes 5-10 minutes)</li>
+        </ol>
+
+        <h4>1.2 Configure Security Group</h4>
+        <ol>
+            <li>Go to <strong>EC2</strong> → <strong>Security Groups</strong> → Find <code>frappe-rds-sg</code></li>
+            <li><strong>Edit Inbound Rules:</strong>
+                <ul>
+                    <li><strong>Type:</strong> MySQL/Aurora</li>
+                    <li><strong>Port:</strong> 3306</li>
+                    <li><strong>Source:</strong>
+                        <ul>
+                            <li>Your IP address (for initial setup)</li>
+                            <li>Or EC2 security group (after EC2 is created)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Save rules</strong></li>
+        </ol>
+
+        <h4>1.3 Get RDS Endpoint</h4>
+        <p>After RDS is created:</p>
+        <ul>
+            <li><strong>Endpoint:</strong> <code>frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com</code></li>
+            <li><strong>Port:</strong> 3306</li>
+            <li><strong>Save these details!</strong></li>
+        </ul>
+
+        <h3><span class="step-number">2</span> Export Local Database</h3>
+        
+        <h4>2.1 Backup Your Local Database</h4>
+        <pre><code>cd /Users/prom3/Desktop/regal/frappe-bench
+
+# Export database
+mysqldump -u _af6374d4ed93f504 -p'zTmiKxBrhzpoetXi' \
+  _af6374d4ed93f504 > frappe_lending_backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Verify backup file
+ls -lh frappe_lending_backup_*.sql</code></pre>
+
+        <h4>2.2 Test Backup File</h4>
+        <pre><code># Check backup file size (should be ~50-100 MB)
+du -h frappe_lending_backup_*.sql
+
+# View first few lines
+head -20 frappe_lending_backup_*.sql</code></pre>
+
+        <h3><span class="step-number">3</span> Create EC2 Instance for Frappe</h3>
+        
+        <h4>3.1 Launch EC2 Instance</h4>
+        <ol>
+            <li><strong>Go to AWS Console</strong> → EC2 → Launch Instance</li>
+            <li><strong>Instance Configuration:</strong>
+                <ul>
+                    <li><strong>Name:</strong> <code>frappe-lending-server</code></li>
+                    <li><strong>AMI:</strong> Ubuntu Server 22.04 LTS (64-bit x86) or ARM64</li>
+                    <li><strong>Instance type:</strong> <code>t3.medium</code> (2 vCPU, 4GB RAM) or larger</li>
+                    <li><strong>Key pair:</strong> Create new or use existing
+                        <ul>
+                            <li>Name: <code>frappe-key</code></li>
+                            <li>Download <code>.pem</code> file and save securely</li>
+                        </ul>
+                    </li>
+                    <li><strong>Network settings:</strong>
+                        <ul>
+                            <li>VPC: Default</li>
+                            <li>Subnet: Public subnet</li>
+                            <li>Auto-assign Public IP: Enable</li>
+                            <li>Security group: Create new
+                                <ul>
+                                    <li>Name: <code>frappe-ec2-sg</code></li>
+                                    <li>Rules:
+                                        <ul>
+                                            <li>SSH (22) - Your IP</li>
+                                            <li>HTTP (80) - Anywhere</li>
+                                            <li>HTTPS (443) - Anywhere</li>
+                                            <li>Custom TCP (8000) - Anywhere (Frappe)</li>
+                                            <li>Custom TCP (5001) - Anywhere (Your API)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Storage:</strong> 30 GB gp3 SSD</li>
+            <li><strong>Launch Instance</strong></li>
+        </ol>
+
+        <h4>3.2 Get EC2 Details</h4>
+        <p>After launch:</p>
+        <ul>
+            <li><strong>Public IP:</strong> <code>xx.xx.xx.xx</code></li>
+            <li><strong>Private IP:</strong> <code>yy.yy.yy.yy</code></li>
+            <li><strong>Save these!</strong></li>
+        </ul>
+
+        <h3><span class="step-number">4</span> Setup EC2 Instance</h3>
+        
+        <h4>4.1 Connect to EC2</h4>
+        <pre><code># From your local machine
+chmod 400 frappe-key.pem
+ssh -i frappe-key.pem ubuntu@[EC2-PUBLIC-IP]</code></pre>
+
+        <h4>4.2 Install Dependencies</h4>
+        <pre><code># Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install required packages
+sudo apt install -y \
+  python3.11 python3.11-venv python3-pip \
+  nodejs npm \
+  redis-server \
+  git curl wget \
+  mariadb-client \
+  nginx \
+  supervisor \
+  certbot python3-certbot-nginx
+
+# Install Python 3.11 if not available
+sudo apt install -y software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt install -y python3.11 python3.11-venv python3.11-dev</code></pre>
+
+        <h4>4.3 Install Frappe Bench</h4>
+        <pre><code># Install bench
+sudo -H pip3 install frappe-bench
+
+# Verify installation
+bench --version</code></pre>
+
+        <h3><span class="step-number">5</span> Import Database to RDS</h3>
+        
+        <h4>5.1 Create Database on RDS</h4>
+        <pre><code># From your local machine, connect to RDS
+mysql -h frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com \
+  -u frappe_admin -p \
+  -e "CREATE DATABASE IF NOT EXISTS frappe_lending CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"</code></pre>
+
+        <h4>5.2 Import Database</h4>
+        <pre><code># From your local machine
+mysql -h frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com \
+  -u frappe_admin -p \
+  frappe_lending < frappe_lending_backup_*.sql</code></pre>
+        
+        <div class="info-box">
+            <strong>Note:</strong> This may take 5-15 minutes depending on database size.
+        </div>
+
+        <h4>5.3 Verify Import</h4>
+        <pre><code>mysql -h frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com \
+  -u frappe_admin -p \
+  -e "USE frappe_lending; SHOW TABLES;" | head -20</code></pre>
+
+        <h3><span class="step-number">6</span> Setup Frappe on EC2</h3>
+        
+        <h4>6.1 Initialize Frappe Bench</h4>
+        <pre><code># On EC2
+cd /home/ubuntu
+
+# Initialize bench
+bench init frappe-bench --frappe-branch version-15 --python python3.11
+cd frappe-bench</code></pre>
+
+        <h4>6.2 Create New Site (Pointing to RDS)</h4>
+        <pre><code># Create site with RDS connection
+bench new-site lending.yourdomain.com \
+  --db-host frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com \
+  --db-port 3306 \
+  --db-name frappe_lending \
+  --db-user frappe_admin \
+  --db-password '[YOUR-RDS-PASSWORD]' \
+  --admin-password '[CREATE-ADMIN-PASSWORD]' \
+  --no-mariadb-socket</code></pre>
+        
+        <div class="info-box">
+            <strong>Note:</strong> Use your domain or EC2 public IP for site name.
+        </div>
+
+        <h4>6.3 Install Lending App</h4>
+        <pre><code># Get your lending app
+cd /home/ubuntu/frappe-bench
+
+# Option 1: If app is in git repo
+bench get-app lending https://github.com/your-repo/lending.git
+
+# Option 2: If you need to copy from local
+# (We'll do this in next step)
+
+# Install app to site
+bench --site lending.yourdomain.com install-app lending</code></pre>
+
+        <h3><span class="step-number">7</span> Deploy Your Code to EC2</h3>
+        
+        <h4>7.1 Upload Your Code</h4>
+        <p><strong>Option A: Using Git (Recommended)</strong></p>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench
+
+# Clone your repo or pull updates
+git clone https://github.com/your-repo/frappe-bench.git .
+# OR if already cloned
+git pull origin main</code></pre>
+
+        <p><strong>Option B: Using SCP (From Local Machine)</strong></p>
+        <pre><code># From your local machine
+cd /Users/prom3/Desktop/regal/frappe-bench
+
+# Upload server folder
+scp -i frappe-key.pem -r server/ ubuntu@[EC2-IP]:~/frappe-bench/
+
+# Upload apps if needed
+scp -i frappe-key.pem -r apps/ ubuntu@[EC2-IP]:~/frappe-bench/</code></pre>
+
+        <h4>7.2 Setup API Server on EC2</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench/server
+
+# Create virtual environment
+python3.11 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install flask requests python-dotenv
+
+# Create .env file
+nano .env</code></pre>
+
+        <p><strong>Add to .env:</strong></p>
+        <pre><code>FRAPPE_BASE_URL=http://127.0.0.1:8000
+FRAPPE_SITE_NAME=lending.yourdomain.com
+FRAPPE_API_KEY=your-api-key
+FRAPPE_API_SECRET=your-api-secret</code></pre>
+
+        <h4>7.3 Update server/utils.py</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench/server
+nano utils.py</code></pre>
+
+        <p><strong>Update FRAPPE_BASE_URL:</strong></p>
+        <pre><code>FRAPPE_BASE_URL = os.getenv('FRAPPE_BASE_URL', 'http://127.0.0.1:8000')
+FRAPPE_SITE_NAME = os.getenv('FRAPPE_SITE_NAME', 'lending.yourdomain.com')</code></pre>
+
+        <h3><span class="step-number">8</span> Update Frappe Site Config</h3>
+        
+        <h4>8.1 Update site_config.json</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench/sites/lending.yourdomain.com
+nano site_config.json</code></pre>
+
+        <p><strong>Update to:</strong></p>
+        <pre><code>{
+  "db_name": "frappe_lending",
+  "db_password": "[YOUR-RDS-PASSWORD]",
+  "db_type": "mariadb",
+  "db_user": "frappe_admin",
+  "db_host": "frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com",
+  "db_port": 3306,
+  "encryption_key": "[COPY-FROM-LOCAL-OR-GENERATE-NEW]"
+}</code></pre>
+
+        <h4>8.2 Generate New Encryption Key (If Needed)</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench
+bench setup config</code></pre>
+
+        <h3><span class="step-number">9</span> Start Services</h3>
+        
+        <h4>9.1 Start Frappe</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench
+
+# Start Frappe (development)
+bench start
+
+# OR setup production mode
+bench setup production</code></pre>
+
+        <h4>9.2 Setup API Server as Service</h4>
+        <pre><code># On EC2
+sudo nano /etc/systemd/system/frappe-api.service</code></pre>
+
+        <p><strong>Add:</strong></p>
+        <pre><code>[Unit]
+Description=Frappe API Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/frappe-bench/server
+Environment="PATH=/home/ubuntu/frappe-bench/server/venv/bin"
+ExecStart=/home/ubuntu/frappe-bench/server/venv/bin/python app.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+        <p><strong>Enable and start:</strong></p>
+        <pre><code>sudo systemctl daemon-reload
+sudo systemctl enable frappe-api
+sudo systemctl start frappe-api
+sudo systemctl status frappe-api</code></pre>
+
+        <h3><span class="step-number">10</span> Setup Nginx Reverse Proxy</h3>
+        
+        <h4>10.1 Configure Nginx for Frappe</h4>
+        <pre><code># On EC2
+sudo nano /etc/nginx/sites-available/frappe</code></pre>
+
+        <p><strong>Add:</strong></p>
+        <pre><code>server {
+    listen 80;
+    server_name lending.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+
+        <h4>10.2 Configure Nginx for API Server</h4>
+        <pre><code>sudo nano /etc/nginx/sites-available/api</code></pre>
+
+        <p><strong>Add:</strong></p>
+        <pre><code>server {
+    listen 80;
+    server_name api.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:5001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+
+        <h4>10.3 Enable Sites</h4>
+        <pre><code>sudo ln -s /etc/nginx/sites-available/frappe /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/api /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx</code></pre>
+
+        <h4>10.4 Setup SSL (Let's Encrypt)</h4>
+        <pre><code># For Frappe
+sudo certbot --nginx -d lending.yourdomain.com
+
+# For API
+sudo certbot --nginx -d api.yourdomain.com</code></pre>
+
+        <h3><span class="step-number">11</span> Security Configuration</h3>
+        
+        <h4>11.1 Update RDS Security Group</h4>
+        <ol>
+            <li>Go to <strong>EC2</strong> → <strong>Security Groups</strong> → <code>frappe-rds-sg</code></li>
+            <li><strong>Edit Inbound Rules:</strong>
+                <ul>
+                    <li>Remove "My IP" rule</li>
+                    <li>Add rule:
+                        <ul>
+                            <li><strong>Type:</strong> MySQL/Aurora</li>
+                            <li><strong>Port:</strong> 3306</li>
+                            <li><strong>Source:</strong> <code>frappe-ec2-sg</code> (EC2 security group)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h4>11.2 Configure Firewall (UFW)</h4>
+        <pre><code># On EC2
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable</code></pre>
+
+        <h4>11.3 Disable RDS Public Access (After Setup)</h4>
+        <ol>
+            <li>Go to <strong>RDS</strong> → Your database → <strong>Modify</strong></li>
+            <li><strong>Connectivity</strong> → <strong>Public access:</strong> No</li>
+            <li><strong>Apply immediately</strong></li>
+        </ol>
+
+        <h3><span class="step-number">12</span> Verify Everything Works</h3>
+        
+        <h4>12.1 Test Frappe</h4>
+        <pre><code># On EC2
+curl http://localhost:8000
+
+# From browser
+http://lending.yourdomain.com</code></pre>
+
+        <h4>12.2 Test API Server</h4>
+        <pre><code># On EC2
+curl http://localhost:5001/api/loan-categories
+
+# From browser
+http://api.yourdomain.com/api/loan-categories</code></pre>
+
+        <h4>12.3 Test Database Connection</h4>
+        <pre><code># On EC2
+mysql -h frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com \
+  -u frappe_admin -p \
+  -e "SELECT COUNT(*) as table_count FROM information_schema.tables WHERE table_schema='frappe_lending';"</code></pre>
+
+        <h3><span class="step-number">13</span> Monitoring & Maintenance</h3>
+        
+        <h4>13.1 Check Logs</h4>
+        <pre><code># Frappe logs
+cd /home/ubuntu/frappe-bench
+bench --site lending.yourdomain.com logs
+
+# API server logs
+sudo journalctl -u frappe-api -f
+
+# Nginx logs
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log</code></pre>
+
+        <h4>13.2 Setup Auto Backup</h4>
+        <pre><code># On EC2
+crontab -e</code></pre>
+
+        <p><strong>Add:</strong></p>
+        <pre><code># Daily database backup at 2 AM
+0 2 * * * mysqldump -h frappe-lending-db.xxxxx.us-east-1.rds.amazonaws.com -u frappe_admin -p'[PASSWORD]' frappe_lending > /home/ubuntu/backups/frappe_lending_$(date +\%Y\%m\%d).sql</code></pre>
+
+        <h3>🎯 Quick Reference Commands</h3>
+        
+        <h4>Database Backup</h4>
+        <pre><code>mysqldump -h [RDS-ENDPOINT] -u frappe_admin -p frappe_lending > backup.sql</code></pre>
+
+        <h4>Restart Services</h4>
+        <pre><code># Frappe
+cd /home/ubuntu/frappe-bench
+bench restart
+
+# API Server
+sudo systemctl restart frappe-api
+
+# Nginx
+sudo systemctl restart nginx</code></pre>
+
+        <h4>Update Code</h4>
+        <pre><code># On EC2
+cd /home/ubuntu/frappe-bench
+git pull
+bench migrate
+bench restart</code></pre>
+
+        <h3>💰 Estimated AWS Costs (Monthly)</h3>
+        <table>
+            <tr>
+                <th>Service</th>
+                <th>Cost</th>
+            </tr>
+            <tr>
+                <td>RDS (db.t3.medium)</td>
+                <td>~$50-70</td>
+            </tr>
+            <tr>
+                <td>EC2 (t3.medium)</td>
+                <td>~$30-40</td>
+            </tr>
+            <tr>
+                <td>Storage (20GB)</td>
+                <td>~$2-5</td>
+            </tr>
+            <tr>
+                <td>Data Transfer</td>
+                <td>~$5-20</td>
+            </tr>
+            <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>~$90-140/month</strong></td>
+            </tr>
+        </table>
+
+        <h3>🆘 Troubleshooting</h3>
+        
+        <h4>Database Connection Issues</h4>
+        <pre><code># Test connection
+mysql -h [RDS-ENDPOINT] -u frappe_admin -p
+
+# Check security group
+# Ensure EC2 security group is allowed in RDS security group</code></pre>
+
+        <h4>Frappe Not Starting</h4>
+        <pre><code># Check logs
+bench --site [site-name] logs
+
+# Check Redis
+sudo systemctl status redis
+
+# Check database connection
+bench --site [site-name] console</code></pre>
+
+        <h4>API Server Not Responding</h4>
+        <pre><code># Check service status
+sudo systemctl status frappe-api
+
+# Check logs
+sudo journalctl -u frappe-api -n 50
+
+# Test locally
+curl http://localhost:5001/api/loan-categories</code></pre>
+
+        <h3>✅ Deployment Checklist</h3>
+        <div class="checklist">
+            <div class="checklist-item">☐ RDS MariaDB created and accessible</div>
+            <div class="checklist-item">☐ Local database exported</div>
+            <div class="checklist-item">☐ Database imported to RDS</div>
+            <div class="checklist-item">☐ EC2 instance created</div>
+            <div class="checklist-item">☐ Frappe installed on EC2</div>
+            <div class="checklist-item">☐ Site created pointing to RDS</div>
+            <div class="checklist-item">☐ Lending app installed</div>
+            <div class="checklist-item">☐ API server deployed</div>
+            <div class="checklist-item">☐ Nginx configured</div>
+            <div class="checklist-item">☐ SSL certificates installed</div>
+            <div class="checklist-item">☐ Security groups configured</div>
+            <div class="checklist-item">☐ Services running</div>
+            <div class="checklist-item">☐ Everything tested</div>
+        </div>
+
+        <!-- DEPLOYMENT SCRIPT SECTION -->
+        <h2>📜 Deployment Helper Script</h2>
+        
+        <p>The <code>deploy_to_aws.sh</code> script automates the initial deployment preparation:</p>
+
+        <h3>Script Overview</h3>
+        <p>This script helps you:</p>
+        <ol>
+            <li>Backup your local database</li>
+            <li>Prepare files for AWS deployment</li>
+            <li>Generate deployment commands</li>
+        </ol>
+
+        <h3>Script Configuration</h3>
+        <pre><code># Configuration
+BACKUP_DIR="./backups"
+DB_USER="_af6374d4ed93f504"
+DB_PASS="zTmiKxBrhzpoetXi"
+DB_NAME="_af6374d4ed93f504"</code></pre>
+
+        <h3>What the Script Does</h3>
+        
+        <h4>Step 1: Creates Database Backup</h4>
+        <pre><code>mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"</code></pre>
+        
+        <h4>Step 2: Creates Deployment Package</h4>
+        <ul>
+            <li>Copies <code>server/</code> folder</li>
+            <li>Copies database backup</li>
+            <li>Creates <code>DEPLOYMENT_INFO.txt</code></li>
+        </ul>
+        
+        <h4>Step 3: Generates Upload Commands</h4>
+        <p>Creates <code>UPLOAD_COMMANDS.sh</code> with SCP commands to upload files to EC2.</p>
+        
+        <h4>Step 4: Generates Import Commands</h4>
+        <p>Creates <code>IMPORT_DATABASE.sh</code> with MySQL commands to import database to RDS.</p>
+
+        <h3>Running the Script</h3>
+        <pre><code>cd /Users/prom3/Desktop/regal/frappe-bench
+chmod +x deploy_to_aws.sh
+./deploy_to_aws.sh</code></pre>
+
+        <h3>Output</h3>
+        <p>The script creates a <code>deploy_package/</code> directory containing:</p>
+        <ul>
+            <li>✅ <code>server/</code> - Your API server code</li>
+            <li>✅ <code>frappe_lending_backup_*.sql</code> - Database backup</li>
+            <li>✅ <code>DEPLOYMENT_INFO.txt</code> - Deployment information</li>
+            <li>✅ <code>UPLOAD_COMMANDS.sh</code> - Upload script</li>
+            <li>✅ <code>IMPORT_DATABASE.sh</code> - Database import script</li>
+        </ul>
+
+        <div class="footer">
+            <p><strong>AWS Deployment Guide</strong></p>
+            <p>Version 1.0 | Last Updated: December 2025</p>
+            <p>For DevOps Team - Keep This Document Secure</p>
+        </div>
+    </div>
+</body>
+</html>
+

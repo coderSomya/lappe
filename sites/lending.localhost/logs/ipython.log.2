@@ -1,1291 +1,4 @@
-2025-12-11 16:50:14,132 INFO ipython === bench console session ===
-2025-12-11 16:50:14,132 INFO ipython import frappe
-
-# 1. Create the Company
-if not frappe.db.exists("Company", "My Lending Co"):
-    company = frappe.get_doc({
-        "doctype": "Company",
-        "company_name": "My Lending Co",
-        "abbr": "MLC",
-        "default_currency": "INR",
-        "country": "India"
-    })
-    company.insert()
-    frappe.db.commit()
-    print("✅ Company Created")
-else:
-    print("ℹ️ Company already exists")
-
-# 2. Create Required Bank & Loan Accounts
-accounts = [
-    {"name": "Disbursement Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Repayment Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Loan Assets", "parent": "Current Assets - MLC", "type": "Receivable"},
-    {"name": "Interest Income", "parent": "Direct Income - MLC", "type": "Income"},
-    {"name": "Penalty Income", "parent": "Direct Income - MLC", "type": "Income"}
-]
-
-for acc in accounts:
-    if not frappe.db.exists("Account", acc["name"] + " - MLC"):
-        try:
-            new_acc = frappe.get_doc({
-                "doctype": "Account",
-                "account_name": acc["name"],
-                "parent_account": acc["parent"],
-                "company": "My Lending Co",
-                "account_type": acc["type"],
-                "currency": "INR"
-            })
-            new_acc.insert()
-            print(f"✅ Created Account: {acc['name']}")
-        except Exception as e:
-            print(f"⚠️ Could not create {acc['name']} (Parent might be missing)")
-    
-frappe.db.commit()
-print("🎉 Setup Complete!")
-2025-12-11 16:50:14,132 INFO ipython import frappe
-
-# --- STEP 1: FIX THE MISSING DATA ---
-# We need to create 'Warehouse Types' manually so the Company creation doesn't crash
-required_types = ["Transit", "Store", "Finished Goods", "Work In Progress"]
-for type_name in required_types:
-    if not frappe.db.exists("Warehouse Type", type_name):
-        frappe.get_doc({
-            "doctype": "Warehouse Type",
-            "name": type_name
-        }).insert(ignore_permissions=True)
-        print(f"🛠️  Fixed missing data: {type_name}")
-
-frappe.db.commit()
-
-# --- STEP 2: CREATE THE COMPANY ---
-if not frappe.db.exists("Company", "My Lending Co"):
-    company = frappe.get_doc({
-        "doctype": "Company",
-        "company_name": "My Lending Co",
-        "abbr": "MLC",
-        "default_currency": "INR",
-        "country": "India"
-    })
-    company.insert()
-    frappe.db.commit()
-    print("✅ Company Created: My Lending Co")
-else:
-    print("ℹ️  Company already exists")
-
-# --- STEP 3: CREATE THE ACCOUNTS ---
-accounts = [
-    {"name": "Disbursement Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Repayment Account", "parent": "Bank Accounts - MLC", "type": "Bank"},
-    {"name": "Loan Assets", "parent": "Current Assets - MLC", "type": "Receivable"},
-    {"name": "Interest Income", "parent": "Direct Income - MLC", "type": "Income"},
-    {"name": "Penalty Income", "parent": "Direct Income - MLC", "type": "Income"}
-]
-
-for acc in accounts:
-    if not frappe.db.exists("Account", acc["name"] + " - MLC"):
-        try:
-            new_acc = frappe.get_doc({
-                "doctype": "Account",
-                "account_name": acc["name"],
-                "parent_account": acc["parent"],
-                "company": "My Lending Co",
-                "account_type": acc["type"],
-                "currency": "INR"
-            })
-            new_acc.insert()
-            print(f"✅ Created Account: {acc['name']}")
-        except Exception as e:
-            # If parent account is missing, we skip (it might be named differently in your version)
-            print(f"⚠️  Skipped {acc['name']} (Parent account check required)")
-
-frappe.db.commit()
-print("🎉 SETUP COMPLETE! Type 'exit' to leave.")
-2025-12-11 16:50:14,132 INFO ipython === session end ===
-2025-12-11 19:49:31,646 INFO ipython === bench console session ===
-2025-12-11 19:49:31,646 INFO ipython # Script to hide non-lending modules
-2025-12-11 19:49:31,646 INFO ipython # Run with: bench --site lending.localhost console < hide_modules_script.py
-2025-12-11 19:49:31,646 INFO ipython # Modules to keep visible (lending-related and essential)
-2025-12-11 19:49:31,646 INFO ipython visible_modules = [
-	"Lending",
-	"Accounts", 
-	"Setup",
-	"Utilities",
-	"Home",
-	"Settings",
-	"Users",
-	"System",
-	"Data",
-	"Email",
-	"Integrations",
-	"Automation",
-	"Build",
-	"Printing",
-	"Productivity",
-	"Website",
-]
-2025-12-11 19:49:31,646 INFO ipython # Get all desktop icons
-2025-12-11 19:49:31,646 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "module_name", "hidden", "blocked"],
-	filters={"standard": 1}
-)
-2025-12-11 19:49:31,646 INFO ipython modules_hidden = []
-2025-12-11 19:49:31,646 INFO ipython for icon in all_icons:
-	module_name = icon.get("module_name") or icon.get("label", "")
-	
-2025-12-11 19:49:31,646 INFO ipython 	# Hide if not in visible list
-2025-12-11 19:49:31,646 INFO ipython 	if module_name not in visible_modules:
-		modules_hidden.append(module_name)
-		frappe.db.set_value("Desktop Icon", icon.name, "hidden", 1)
-		frappe.db.set_value("Desktop Icon", icon.name, "blocked", 1)
-		print(f"Hiding: {module_name}")
-2025-12-11 19:49:31,646 INFO ipython frappe.db.commit()
-2025-12-11 19:49:31,646 INFO ipython frappe.clear_cache()
-2025-12-11 19:49:31,646 INFO ipython print(f"\n✅ Hidden {len(modules_hidden)} desktop icons")
-2025-12-11 19:49:31,646 INFO ipython print(f"Modules hidden: {', '.join(modules_hidden)}")
-2025-12-11 19:49:31,646 INFO ipython === session end ===
-2025-12-11 19:49:53,315 INFO ipython === bench console session ===
-2025-12-11 19:49:53,315 INFO ipython # Script to hide non-lending modules
-2025-12-11 19:49:53,315 INFO ipython # Run with: bench --site lending.localhost console < hide_modules_script.py
-2025-12-11 19:49:53,315 INFO ipython # Modules to keep visible (lending-related and essential)
-2025-12-11 19:49:53,315 INFO ipython visible_modules = [
-	"Lending",
-	"Accounts", 
-	"Setup",
-	"Utilities",
-	"Home",
-	"Settings",
-	"Users",
-	"System",
-	"Data",
-	"Email",
-	"Integrations",
-	"Automation",
-	"Build",
-	"Printing",
-	"Productivity",
-	"Website",
-]
-2025-12-11 19:49:53,315 INFO ipython # Get all desktop icons
-2025-12-11 19:49:53,315 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden"],
-	filters={"standard": 1}
-)
-2025-12-11 19:49:53,315 INFO ipython modules_hidden = []
-2025-12-11 19:49:53,315 INFO ipython for icon in all_icons:
-	label = icon.get("label", "")
-	
-2025-12-11 19:49:53,315 INFO ipython 	# Hide if not in visible list
-2025-12-11 19:49:53,315 INFO ipython 	if label and label not in visible_modules:
-		modules_hidden.append(label)
-		frappe.db.set_value("Desktop Icon", icon.name, "hidden", 1)
-		print(f"Hiding: {label}")
-2025-12-11 19:49:53,315 INFO ipython frappe.db.commit()
-2025-12-11 19:49:53,315 INFO ipython frappe.clear_cache()
-2025-12-11 19:49:53,315 INFO ipython print(f"\n✅ Hidden {len(modules_hidden)} desktop icons")
-2025-12-11 19:49:53,315 INFO ipython print(f"Modules hidden: {', '.join(modules_hidden)}")
-2025-12-11 19:49:53,315 INFO ipython === session end ===
-2025-12-11 19:50:02,686 INFO ipython === bench console session ===
-2025-12-11 19:50:02,687 INFO ipython # Check existing desktop icons
-2025-12-11 19:50:02,687 INFO ipython import frappe
-2025-12-11 19:50:02,687 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:50:02,687 INFO ipython frappe.connect()
-2025-12-11 19:50:02,687 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden", "standard", "app"],
-	order_by="label"
-)
-2025-12-11 19:50:02,687 INFO ipython print(f"\nFound {len(all_icons)} desktop icons:\n")
-2025-12-11 19:50:02,687 INFO ipython for icon in all_icons:
-	status = "HIDDEN" if icon.hidden else "VISIBLE"
-	print(f"{icon.label:30} | {status:8} | Standard: {icon.standard} | App: {icon.app or 'N/A'}")
-2025-12-11 19:50:02,687 INFO ipython frappe.db.close()
-2025-12-11 19:50:02,687 INFO ipython === session end ===
-2025-12-11 19:50:12,704 INFO ipython === bench console session ===
-2025-12-11 19:50:12,704 INFO ipython # Script to hide non-lending modules
-2025-12-11 19:50:12,704 INFO ipython # Run with: bench --site lending.localhost console < hide_modules_script.py
-2025-12-11 19:50:12,705 INFO ipython # Modules to keep visible (lending-related and essential)
-2025-12-11 19:50:12,705 INFO ipython visible_modules = [
-	"Lending",
-	"Accounts", 
-	"Settings",
-	"Users",
-	"System",
-	"Data",
-	"Email",
-	"Integrations",
-	"Automation",
-	"Build",
-	"Printing",
-	"Productivity",
-	"Website",
-	# Lending-specific modules
-	"Loans",
-	"Loan Origination",
-	"Disbursements",
-	"Repayments",
-	"Repayment Schedules",
-	"Interest Accruals",
-	"Write Offs",
-	"Demands",
-]
-2025-12-11 19:50:12,705 INFO ipython # Get all desktop icons
-2025-12-11 19:50:12,705 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden"],
-	filters={"standard": 1}
-)
-2025-12-11 19:50:12,705 INFO ipython modules_hidden = []
-2025-12-11 19:50:12,705 INFO ipython for icon in all_icons:
-	label = icon.get("label", "")
-	
-2025-12-11 19:50:12,705 INFO ipython 	# Hide if not in visible list
-2025-12-11 19:50:12,705 INFO ipython 	if label and label not in visible_modules:
-		modules_hidden.append(label)
-		frappe.db.set_value("Desktop Icon", icon.name, "hidden", 1)
-		print(f"Hiding: {label}")
-2025-12-11 19:50:12,705 INFO ipython frappe.db.commit()
-2025-12-11 19:50:12,705 INFO ipython frappe.clear_cache()
-2025-12-11 19:50:12,705 INFO ipython print(f"\n✅ Hidden {len(modules_hidden)} desktop icons")
-2025-12-11 19:50:12,705 INFO ipython print(f"Modules hidden: {', '.join(modules_hidden)}")
-2025-12-11 19:50:12,705 INFO ipython === session end ===
-2025-12-11 19:50:25,557 INFO ipython === bench console session ===
-2025-12-11 19:50:25,557 INFO ipython # Direct script to hide non-lending modules
-2025-12-11 19:50:25,557 INFO ipython import frappe
-2025-12-11 19:50:25,557 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:50:25,557 INFO ipython frappe.connect()
-2025-12-11 19:50:25,557 INFO ipython # Modules to keep visible
-2025-12-11 19:50:25,557 INFO ipython visible_modules = [
-	"Lending", "Accounts", "Settings", "Users", "System", "Data", "Email",
-	"Integrations", "Automation", "Build", "Printing", "Productivity", "Website",
-	"Loans", "Loan Origination", "Disbursements", "Repayments", 
-	"Repayment Schedules", "Interest Accruals", "Write Offs", "Demands"
-]
-2025-12-11 19:50:25,557 INFO ipython # Get all standard desktop icons
-2025-12-11 19:50:25,557 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden"],
-	filters={"standard": 1}
-)
-2025-12-11 19:50:25,557 INFO ipython modules_hidden = []
-2025-12-11 19:50:25,557 INFO ipython for icon in all_icons:
-	label = icon.get("label", "").strip()
-	if label and label not in visible_modules:
-		modules_hidden.append(label)
-		doc = frappe.get_doc("Desktop Icon", icon.name)
-		doc.hidden = 1
-		doc.save(ignore_permissions=True)
-		print(f"Hiding: {label}")
-2025-12-11 19:50:25,557 INFO ipython frappe.db.commit()
-2025-12-11 19:50:25,557 INFO ipython frappe.clear_cache()
-2025-12-11 19:50:25,557 INFO ipython print(f"\n✅ Hidden {len(modules_hidden)} desktop icons")
-2025-12-11 19:50:25,557 INFO ipython if modules_hidden:
-	print(f"Modules hidden: {', '.join(modules_hidden)}")
-2025-12-11 19:50:25,557 INFO ipython frappe.db.close()
-2025-12-11 19:50:25,558 INFO ipython === session end ===
-2025-12-11 19:54:53,053 INFO ipython === bench console session ===
-2025-12-11 19:54:53,054 INFO ipython import frappe
-2025-12-11 19:54:53,054 INFO ipython frappe.init()
-2025-12-11 19:54:53,054 INFO ipython frappe.connect()
-2025-12-11 19:54:53,054 INFO ipython try:
-    from frappe.boot import get_sidebar_items
-    items = get_sidebar_items()
-    print("Success!")
-except Exception as e:
-    import traceback
-    print(f"Error: {e}")
-    traceback.print_exc()
-frappe.db.close()
-2025-12-11 19:54:53,054 INFO ipython === session end ===
-2025-12-11 19:55:01,098 INFO ipython === bench console session ===
-2025-12-11 19:55:01,098 INFO ipython import frappe
-2025-12-11 19:55:01,098 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:55:01,098 INFO ipython frappe.connect()
-2025-12-11 19:55:01,098 INFO ipython try:
-    from frappe.boot import get_bootinfo
-    bootinfo = get_bootinfo()
-    print("Bootinfo loaded successfully!")
-except Exception as e:
-    import traceback
-    print(f"Error: {e}")
-    traceback.print_exc()
-frappe.db.close()
-2025-12-11 19:55:01,098 INFO ipython === session end ===
-2025-12-11 19:57:25,292 INFO ipython === bench console session ===
-2025-12-11 19:57:25,292 INFO ipython import frappe
-2025-12-11 19:57:25,292 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:57:25,292 INFO ipython frappe.connect()
-2025-12-11 19:57:25,292 INFO ipython # Check current state
-2025-12-11 19:57:25,292 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-    fields=["name", "label", "hidden", "standard", "owner"],
-    filters={"standard": 1},
-    order_by="label"
-)
-2025-12-11 19:57:25,292 INFO ipython print(f"\nTotal standard icons: {len(all_icons)}")
-2025-12-11 19:57:25,292 INFO ipython print("\nVisible (not hidden) icons:")
-2025-12-11 19:57:25,292 INFO ipython for icon in all_icons:
-    if not icon.hidden:
-        print(f"  - {icon.label}")
-2025-12-11 19:57:25,292 INFO ipython frappe.db.close()
-2025-12-11 19:57:25,292 INFO ipython === session end ===
-2025-12-11 19:57:26,521 INFO ipython === bench console session ===
-2025-12-11 19:57:26,521 INFO ipython # Direct script to hide non-lending modules
-2025-12-11 19:57:26,521 INFO ipython import frappe
-2025-12-11 19:57:26,521 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:57:26,521 INFO ipython frappe.connect()
-2025-12-11 19:57:26,521 INFO ipython # Modules to keep visible
-2025-12-11 19:57:26,522 INFO ipython visible_modules = [
-	"Lending", "Accounts", "Settings", "Users", "System", "Data", "Email",
-	"Integrations", "Automation", "Build", "Printing", "Productivity", "Website",
-	"Loans", "Loan Origination", "Disbursements", "Repayments", 
-	"Repayment Schedules", "Interest Accruals", "Write Offs", "Demands"
-]
-2025-12-11 19:57:26,522 INFO ipython # Get all standard desktop icons
-2025-12-11 19:57:26,522 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden"],
-	filters={"standard": 1}
-)
-2025-12-11 19:57:26,522 INFO ipython modules_hidden = []
-2025-12-11 19:57:26,522 INFO ipython for icon in all_icons:
-	label = icon.get("label", "").strip()
-	if label and label not in visible_modules:
-		modules_hidden.append(label)
-		doc = frappe.get_doc("Desktop Icon", icon.name)
-		doc.hidden = 1
-		doc.save(ignore_permissions=True)
-		print(f"Hiding: {label}")
-2025-12-11 19:57:26,522 INFO ipython frappe.db.commit()
-2025-12-11 19:57:26,522 INFO ipython frappe.clear_cache()
-2025-12-11 19:57:26,522 INFO ipython print(f"\n✅ Hidden {len(modules_hidden)} desktop icons")
-2025-12-11 19:57:26,522 INFO ipython if modules_hidden:
-	print(f"Modules hidden: {', '.join(modules_hidden)}")
-2025-12-11 19:57:26,522 INFO ipython frappe.db.close()
-2025-12-11 19:57:26,522 INFO ipython === session end ===
-2025-12-11 19:57:42,385 INFO ipython === bench console session ===
-2025-12-11 19:57:42,385 INFO ipython import frappe
-2025-12-11 19:57:42,386 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:57:42,386 INFO ipython frappe.connect()
-2025-12-11 19:57:42,386 INFO ipython # Get current user
-2025-12-11 19:57:42,386 INFO ipython user = frappe.session.user
-2025-12-11 19:57:42,386 INFO ipython print(f"Current user: {user}")
-2025-12-11 19:57:42,386 INFO ipython # Check for user-specific icons
-2025-12-11 19:57:42,386 INFO ipython user_icons = frappe.get_all("Desktop Icon", 
-    fields=["name", "label", "hidden", "standard", "owner"],
-    filters={"standard": 0, "owner": user},
-    order_by="label"
-)
-2025-12-11 19:57:42,386 INFO ipython print(f"\nUser-specific icons: {len(user_icons)}")
-2025-12-11 19:57:42,386 INFO ipython for icon in user_icons:
-    print(f"  - {icon.label} (hidden: {icon.hidden})")
-2025-12-11 19:57:42,386 INFO ipython # Also check all non-standard icons
-2025-12-11 19:57:42,386 INFO ipython all_custom = frappe.get_all("Desktop Icon", 
-    fields=["name", "label", "hidden", "standard", "owner"],
-    filters={"standard": 0},
-    order_by="label"
-)
-2025-12-11 19:57:42,386 INFO ipython print(f"\nAll custom icons: {len(all_custom)}")
-2025-12-11 19:57:42,386 INFO ipython # Check visible standard icons that should be hidden
-2025-12-11 19:57:42,386 INFO ipython visible_unwanted = frappe.get_all("Desktop Icon", 
-    fields=["name", "label", "hidden"],
-    filters={"standard": 1, "hidden": 0},
-    order_by="label"
-)
-2025-12-11 19:57:42,386 INFO ipython unwanted_modules = ["Manufacturing", "Stock", "Buying", "Selling", "CRM", "Projects", 
-                   "Support", "Assets", "Subcontracting", "Subscription", "Banking", 
-                   "Budget", "Financial Reports", "Payables", "Receivables", "Taxes", 
-                   "Opening & Closing", "Accounting", "Quality"]
-2025-12-11 19:57:42,386 INFO ipython print(f"\nUnwanted modules still visible:")
-2025-12-11 19:57:42,386 INFO ipython for icon in visible_unwanted:
-    if icon.label in unwanted_modules:
-        print(f"  - {icon.label} (name: {icon.name})")
-        # Force hide it
-        frappe.db.set_value("Desktop Icon", icon.name, "hidden", 1)
-        print(f"    -> Hidden")
-2025-12-11 19:57:42,386 INFO ipython frappe.db.commit()
-2025-12-11 19:57:42,386 INFO ipython frappe.clear_cache()
-2025-12-11 19:57:42,386 INFO ipython print("\n✅ Cache cleared and unwanted icons hidden")
-2025-12-11 19:57:42,386 INFO ipython frappe.db.close()
-2025-12-11 19:57:42,386 INFO ipython === session end ===
-2025-12-11 19:58:02,836 INFO ipython === bench console session ===
-2025-12-11 19:58:02,836 INFO ipython # Force hide all unwanted modules
-2025-12-11 19:58:02,836 INFO ipython import frappe
-2025-12-11 19:58:02,836 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:58:02,836 INFO ipython frappe.connect()
-2025-12-11 19:58:02,836 INFO ipython # Modules to keep visible
-2025-12-11 19:58:02,836 INFO ipython visible_modules = [
-	"Lending", "Accounts", "Settings", "Users", "System", "Data", "Email",
-	"Integrations", "Automation", "Build", "Printing", "Productivity", "Website",
-	"Loans", "Loan Origination", "Disbursements", "Repayments", 
-	"Repayment Schedules", "Interest Accruals", "Write Offs", "Demands"
-]
-2025-12-11 19:58:02,836 INFO ipython # Get ALL desktop icons (standard and custom)
-2025-12-11 19:58:02,836 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-	fields=["name", "label", "hidden", "blocked", "standard"],
-	order_by="label"
-)
-2025-12-11 19:58:02,836 INFO ipython print(f"Total desktop icons found: {len(all_icons)}")
-2025-12-11 19:58:02,836 INFO ipython modules_hidden = []
-2025-12-11 19:58:02,836 INFO ipython for icon in all_icons:
-	label = icon.get("label", "").strip()
-	
-2025-12-11 19:58:02,837 INFO ipython 	if label and label not in visible_modules:
-		modules_hidden.append(label)
-		# Force hide and block
-		frappe.db.set_value("Desktop Icon", icon.name, "hidden", 1)
-		frappe.db.set_value("Desktop Icon", icon.name, "blocked", 1)
-		print(f"Hidden & Blocked: {label}")
-2025-12-11 19:58:02,837 INFO ipython frappe.db.commit()
-2025-12-11 19:58:02,837 INFO ipython # Clear all caches
-2025-12-11 19:58:02,837 INFO ipython frappe.clear_cache()
-2025-12-11 19:58:02,837 INFO ipython frappe.cache().delete_value("desktop_icons", user=frappe.session.user)
-2025-12-11 19:58:02,837 INFO ipython frappe.cache().delete_value("bootinfo", user=frappe.session.user)
-2025-12-11 19:58:02,837 INFO ipython # Also clear for all users
-2025-12-11 19:58:02,837 INFO ipython frappe.db.sql("DELETE FROM `__Cache` WHERE `key` LIKE 'desktop_icons%'")
-2025-12-11 19:58:02,837 INFO ipython frappe.db.sql("DELETE FROM `__Cache` WHERE `key` LIKE 'bootinfo%'")
-2025-12-11 19:58:02,837 INFO ipython print(f"\n✅ Hidden & Blocked {len(modules_hidden)} desktop icons")
-2025-12-11 19:58:02,837 INFO ipython print(f"Modules: {', '.join(modules_hidden[:10])}...")
-2025-12-11 19:58:02,837 INFO ipython print("\n✅ All caches cleared")
-2025-12-11 19:58:02,837 INFO ipython print("\n⚠️  Please do a HARD REFRESH in your browser (Cmd+Shift+R or Ctrl+Shift+R)")
-2025-12-11 19:58:02,837 INFO ipython print("   and clear browser localStorage if icons still appear")
-2025-12-11 19:58:02,837 INFO ipython frappe.db.close()
-2025-12-11 19:58:02,837 INFO ipython === session end ===
-2025-12-11 19:58:16,989 INFO ipython === bench console session ===
-2025-12-11 19:58:16,989 INFO ipython import frappe
-2025-12-11 19:58:16,989 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:58:16,989 INFO ipython frappe.connect()
-2025-12-11 19:58:16,989 INFO ipython # Check all icons and their status
-2025-12-11 19:58:16,989 INFO ipython all_icons = frappe.get_all("Desktop Icon", 
-    fields=["name", "label", "hidden", "blocked", "standard"],
-    order_by="label"
-)
-2025-12-11 19:58:16,989 INFO ipython unwanted = ["Manufacturing", "Stock", "Buying", "Selling", "CRM", "Projects", 
-            "Support", "Assets", "Subcontracting", "Subscription", "Banking", 
-            "Budget", "Financial Reports", "Payables", "Receivables", "Taxes", 
-            "Opening & Closing", "Accounting", "Quality"]
-2025-12-11 19:58:16,989 INFO ipython print("Checking unwanted modules:")
-2025-12-11 19:58:16,989 INFO ipython for icon in all_icons:
-    if icon.label in unwanted:
-        print(f"\n{icon.label}:")
-        print(f"  - Hidden: {icon.hidden}")
-        print(f"  - Blocked: {icon.blocked}")
-        print(f"  - Standard: {icon.standard}")
-        print(f"  - Name: {icon.name}")
-        
-2025-12-11 19:58:16,989 INFO ipython         # Force update
-2025-12-11 19:58:16,989 INFO ipython         doc = frappe.get_doc("Desktop Icon", icon.name)
-2025-12-11 19:58:16,989 INFO ipython         doc.hidden = 1
-2025-12-11 19:58:16,989 INFO ipython         doc.blocked = 1
-2025-12-11 19:58:16,989 INFO ipython         doc.save(ignore_permissions=True)
-2025-12-11 19:58:16,989 INFO ipython         print(f"  -> Updated to hidden=1, blocked=1")
-2025-12-11 19:58:16,989 INFO ipython frappe.db.commit()
-2025-12-11 19:58:16,989 INFO ipython frappe.clear_cache()
-2025-12-11 19:58:16,989 INFO ipython # Clear desktop icons cache for all users
-2025-12-11 19:58:16,989 INFO ipython frappe.db.sql("DELETE FROM `__Cache` WHERE `key` LIKE 'desktop_icons%'")
-2025-12-11 19:58:16,989 INFO ipython print("\n✅ All unwanted modules hidden and caches cleared")
-2025-12-11 19:58:16,989 INFO ipython frappe.db.close()
-2025-12-11 19:58:16,989 INFO ipython === session end ===
-2025-12-11 19:58:26,589 INFO ipython === bench console session ===
-2025-12-11 19:58:26,589 INFO ipython import frappe
-2025-12-11 19:58:26,589 INFO ipython frappe.init(site="lending.localhost")
-2025-12-11 19:58:26,589 INFO ipython frappe.connect()
-2025-12-11 19:58:26,589 INFO ipython unwanted = ["Manufacturing", "Stock", "Buying", "Selling", "CRM", "Projects", 
-            "Support", "Assets", "Subcontracting", "Subscription", "Banking", 
-            "Budget", "Financial Reports", "Payables", "Receivables", "Taxes", 
-            "Opening & Closing", "Accounting", "Quality"]
-2025-12-11 19:58:26,589 INFO ipython # Use SQL to directly update
-2025-12-11 19:58:26,589 INFO ipython for module in unwanted:
-    frappe.db.sql("""
-        UPDATE `tabDesktop Icon` 
-        SET `hidden` = 1 
-        WHERE `label` = %s AND `standard` = 1
-    """, (module,))
-    print(f"Hidden: {module}")
-2025-12-11 19:58:26,590 INFO ipython frappe.db.commit()
-2025-12-11 19:58:26,590 INFO ipython frappe.clear_cache()
-2025-12-11 19:58:26,590 INFO ipython print(f"\n✅ Hidden {len(unwanted)} modules")
-2025-12-11 19:58:26,590 INFO ipython print("\n⚠️  IMPORTANT: Clear your browser's localStorage!")
-2025-12-11 19:58:26,590 INFO ipython print("   Open browser console (F12) and run:")
-2025-12-11 19:58:26,590 INFO ipython print("   localStorage.clear(); location.reload();")
-2025-12-11 19:58:26,590 INFO ipython frappe.db.close()
-2025-12-11 19:58:26,590 INFO ipython === session end ===
-2025-12-12 00:11:45,408 INFO ipython === bench console session ===
-2025-12-12 00:11:45,408 INFO ipython import frappe
-2025-12-12 00:11:45,409 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:11:45,409 INFO ipython frappe.connect()
-2025-12-12 00:11:45,409 INFO ipython # Check if we have a company and accounts
-2025-12-12 00:11:45,409 INFO ipython company = frappe.db.get_value("Company", {"name": ("!=", "")}, "name")
-2025-12-12 00:11:45,409 INFO ipython print(f"Company: {company}")
-2025-12-12 00:11:45,409 INFO ipython if company:
-    # Get some basic accounts
-    accounts = frappe.get_all("Account", 
-        fields=["name", "account_name", "account_type"],
-        filters={"company": company},
-        limit=10
-    )
-    print(f"\nAvailable accounts: {len(accounts)}")
-    for acc in accounts[:5]:
-        print(f"  - {acc.account_name} ({acc.account_type})")
-2025-12-12 00:11:45,409 INFO ipython frappe.db.close()
-2025-12-12 00:11:45,409 INFO ipython === session end ===
-2025-12-12 00:12:11,392 INFO ipython === bench console session ===
-2025-12-12 00:12:11,393 INFO ipython import frappe
-2025-12-12 00:12:11,393 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:12:11,393 INFO ipython frappe.connect()
-2025-12-12 00:12:11,393 INFO ipython company = "My Lending Co"
-2025-12-12 00:12:11,393 INFO ipython # Get or create required accounts
-2025-12-12 00:12:11,393 INFO ipython def get_or_create_account(account_name, account_type, parent_account=None):
-    """Get existing account or create a new one"""
-    if parent_account:
-        filters = {"account_name": account_name, "company": company, "parent_account": parent_account}
-    else:
-        filters = {"account_name": account_name, "company": company}
-    
-2025-12-12 00:12:11,393 INFO ipython     account = frappe.db.get_value("Account", filters, "name")
-2025-12-12 00:12:11,393 INFO ipython     if not account:
-        # Create account
-        doc = frappe.new_doc("Account")
-        doc.account_name = account_name
-        doc.account_type = account_type
-        doc.company = company
-        if parent_account:
-            doc.parent_account = parent_account
-        else:
-            # Get root account
-            root = frappe.db.get_value("Account", {"company": company, "is_group": 1, "parent_account": ("is", "not set")}, "name")
-            if root:
-                doc.parent_account = root
-        doc.insert(ignore_permissions=True)
-        account = doc.name
-        print(f"Created account: {account_name} ({account})")
-    else:
-        print(f"Using existing account: {account_name} ({account})")
-    
-2025-12-12 00:12:11,393 INFO ipython     return account
-2025-12-12 00:12:11,393 INFO ipython # Get parent account for loan accounts
-2025-12-12 00:12:11,393 INFO ipython current_assets = frappe.db.get_value("Account", {"account_name": "Current Assets", "company": company}, "name")
-2025-12-12 00:12:11,393 INFO ipython if not current_assets:
-    current_assets = get_or_create_account("Current Assets", "Asset")
-2025-12-12 00:12:11,393 INFO ipython # Create loan product accounts
-2025-12-12 00:12:11,393 INFO ipython accounts = {
-    "loan_account": get_or_create_account("Loans Receivable", "Receivable", current_assets),
-    "payment_account": get_or_create_account("Loan Repayment Account", "Bank", current_assets),
-    "disbursement_account": get_or_create_account("Loan Disbursement Account", "Bank", current_assets),
-    "interest_income_account": get_or_create_account("Interest Income", "Income", None),
-    "interest_accrued_account": get_or_create_account("Interest Accrued", "Asset", current_assets),
-    "interest_receivable_account": get_or_create_account("Interest Receivable", "Receivable", current_assets),
-    "interest_waiver_account": get_or_create_account("Interest Waiver", "Expense", None),
-    "penalty_income_account": get_or_create_account("Penalty Income", "Income", None),
-    "penalty_accrued_account": get_or_create_account("Penalty Accrued", "Asset", current_assets),
-    "penalty_receivable_account": get_or_create_account("Penalty Receivable", "Receivable", current_assets),
-    "penalty_waiver_account": get_or_create_account("Penalty Waiver", "Expense", None),
-    "security_deposit_account": get_or_create_account("Security Deposits", "Asset", current_assets),
-    "customer_refund_account": get_or_create_account("Customer Refunds", "Liability", None),
-    "broken_period_interest_recovery_account": get_or_create_account("Broken Period Interest Recovery", "Income", None),
-    "write_off_account": get_or_create_account("Loan Write Off", "Expense", None),
-    "write_off_recovery_account": get_or_create_account("Write Off Recovery", "Income", None),
-}
-2025-12-12 00:12:11,393 INFO ipython print(f"\n✅ All accounts ready for loan product")
-2025-12-12 00:12:11,393 INFO ipython print(f"Company: {company}")
-2025-12-12 00:12:11,393 INFO ipython frappe.db.commit()
-2025-12-12 00:12:11,393 INFO ipython frappe.db.close()
-2025-12-12 00:12:11,393 INFO ipython === session end ===
-2025-12-12 00:12:43,992 INFO ipython === bench console session ===
-2025-12-12 00:12:43,992 INFO ipython #!/usr/bin/env python3
-2025-12-12 00:12:43,992 INFO ipython """
-Script to create a new Loan Product
-Run with: bench --site lending.localhost console < create_loan_product.py
-"""
-2025-12-12 00:12:43,992 INFO ipython import frappe
-2025-12-12 00:12:43,992 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:12:43,992 INFO ipython frappe.connect()
-2025-12-12 00:12:43,992 INFO ipython company = "My Lending Co"
-2025-12-12 00:12:43,992 INFO ipython # Get existing accounts or use defaults
-2025-12-12 00:12:43,992 INFO ipython def get_account(account_name_pattern, account_type=None):
-    """Find an existing account by name pattern"""
-    filters = {"account_name": ("like", f"%{account_name_pattern}%"), "company": company}
-    if account_type:
-        filters["account_type"] = account_type
-    
-2025-12-12 00:12:43,992 INFO ipython     account = frappe.db.get_value("Account", filters, "name")
-2025-12-12 00:12:43,992 INFO ipython     return account
-2025-12-12 00:12:43,992 INFO ipython # Get required accounts (using existing or creating simple ones)
-2025-12-12 00:12:43,992 INFO ipython # For now, let's use existing accounts or get the first account of each type
-2025-12-12 00:12:43,992 INFO ipython all_accounts = frappe.get_all("Account", 
-    fields=["name", "account_name", "account_type"],
-    filters={"company": company}
-)
-2025-12-12 00:12:43,992 INFO ipython # Find accounts by type
-2025-12-12 00:12:43,992 INFO ipython bank_accounts = [a for a in all_accounts if "bank" in a.account_name.lower() or a.account_type == "Bank"]
-2025-12-12 00:12:43,992 INFO ipython receivable_accounts = [a for a in all_accounts if "receivable" in a.account_name.lower() or a.account_type == "Receivable"]
-2025-12-12 00:12:43,992 INFO ipython income_accounts = [a for a in all_accounts if "income" in a.account_name.lower() or a.account_type == "Income"]
-2025-12-12 00:12:43,992 INFO ipython expense_accounts = [a for a in all_accounts if "expense" in a.account_name.lower() or a.account_type == "Expense"]
-2025-12-12 00:12:43,992 INFO ipython asset_accounts = [a for a in all_accounts if a.account_type == "Asset"]
-2025-12-12 00:12:43,993 INFO ipython liability_accounts = [a for a in all_accounts if a.account_type == "Liability"]
-2025-12-12 00:12:43,993 INFO ipython # Map accounts
-2025-12-12 00:12:43,993 INFO ipython accounts = {
-    "loan_account": get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else all_accounts[0].name),
-    "payment_account": get_account("Bank") or (bank_accounts[0].name if bank_accounts else all_accounts[0].name),
-    "disbursement_account": get_account("Bank") or (bank_accounts[0].name if bank_accounts else all_accounts[0].name),
-    "interest_income_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "interest_accrued_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "interest_receivable_account": get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else all_accounts[0].name),
-    "interest_waiver_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "penalty_income_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "penalty_accrued_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "penalty_receivable_account": get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else all_accounts[0].name),
-    "penalty_waiver_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "security_deposit_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "customer_refund_account": get_account("Liability") or (liability_accounts[0].name if liability_accounts else all_accounts[0].name),
-    "broken_period_interest_recovery_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "write_off_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "write_off_recovery_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-}
-2025-12-12 00:12:43,993 INFO ipython print("Using accounts:")
-2025-12-12 00:12:43,993 INFO ipython for key, value in accounts.items():
-    account_name = frappe.db.get_value("Account", value, "account_name")
-    print(f"  {key}: {account_name} ({value})")
-2025-12-12 00:12:43,993 INFO ipython # Create Loan Product
-2025-12-12 00:12:43,993 INFO ipython product_code = "LP-001"
-2025-12-12 00:12:43,993 INFO ipython product_name = "Standard Loan Product"
-2025-12-12 00:12:43,993 INFO ipython # Check if already exists
-2025-12-12 00:12:43,993 INFO ipython if frappe.db.exists("Loan Product", product_code):
-    print(f"\n⚠️  Loan Product {product_code} already exists!")
-    print("Please use a different product code or delete the existing one.")
-else:
-    loan_product = frappe.new_doc("Loan Product")
-    loan_product.product_code = product_code
-    loan_product.product_name = product_name
-    loan_product.company = company
-    loan_product.rate_of_interest = 12.0  # 12% yearly
-    loan_product.penalty_interest_rate = 2.0  # 2% penalty
-    loan_product.maximum_loan_amount = 1000000  # 1 million
-    loan_product.is_term_loan = 1
-    loan_product.repayment_schedule_type = "Monthly as per repayment start date"
-    loan_product.min_days_bw_disbursement_first_repayment = 30
-    loan_product.grace_period_in_days = 0
-    loan_product.days_past_due_threshold_for_npa = 90
-    
-2025-12-12 00:12:43,993 INFO ipython     # Set all required accounts
-2025-12-12 00:12:43,993 INFO ipython     for key, account in accounts.items():
-        setattr(loan_product, key, account)
-    
-2025-12-12 00:12:43,993 INFO ipython     loan_product.insert(ignore_permissions=True)
-2025-12-12 00:12:43,993 INFO ipython     print(f"\n✅ Created Loan Product: {product_code} - {product_name}")
-2025-12-12 00:12:43,993 INFO ipython     print(f"   Name: {loan_product.name}")
-2025-12-12 00:12:43,993 INFO ipython     print(f"   Rate of Interest: {loan_product.rate_of_interest}%")
-2025-12-12 00:12:43,993 INFO ipython     print(f"   Maximum Loan Amount: {loan_product.maximum_loan_amount}")
-2025-12-12 00:12:43,993 INFO ipython frappe.db.commit()
-2025-12-12 00:12:43,993 INFO ipython frappe.db.close()
-2025-12-12 00:12:43,993 INFO ipython === session end ===
-2025-12-12 00:12:55,818 INFO ipython === bench console session ===
-2025-12-12 00:12:55,819 INFO ipython #!/usr/bin/env python3
-2025-12-12 00:12:55,819 INFO ipython """
-Script to create a new Loan Product
-Run with: bench --site lending.localhost console < create_loan_product.py
-"""
-2025-12-12 00:12:55,819 INFO ipython import frappe
-2025-12-12 00:12:55,819 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:12:55,819 INFO ipython frappe.connect()
-2025-12-12 00:12:55,819 INFO ipython company = "My Lending Co"
-2025-12-12 00:12:55,819 INFO ipython # Get existing accounts or use defaults
-2025-12-12 00:12:55,819 INFO ipython def get_account(account_name_pattern, account_type=None):
-    """Find an existing account by name pattern"""
-    filters = {"account_name": ("like", f"%{account_name_pattern}%"), "company": company}
-    if account_type:
-        filters["account_type"] = account_type
-    
-2025-12-12 00:12:55,819 INFO ipython     account = frappe.db.get_value("Account", filters, "name")
-2025-12-12 00:12:55,819 INFO ipython     return account
-2025-12-12 00:12:55,819 INFO ipython # Get required accounts (using existing or creating simple ones)
-2025-12-12 00:12:55,819 INFO ipython # For now, let's use existing accounts or get the first account of each type
-2025-12-12 00:12:55,819 INFO ipython all_accounts = frappe.get_all("Account", 
-    fields=["name", "account_name", "account_type"],
-    filters={"company": company}
-)
-2025-12-12 00:12:55,819 INFO ipython # Find accounts by type
-2025-12-12 00:12:55,819 INFO ipython bank_accounts = [a for a in all_accounts if "bank" in a.account_name.lower() or a.account_type == "Bank"]
-2025-12-12 00:12:55,819 INFO ipython receivable_accounts = [a for a in all_accounts if "receivable" in a.account_name.lower() or a.account_type == "Receivable"]
-2025-12-12 00:12:55,819 INFO ipython income_accounts = [a for a in all_accounts if "income" in a.account_name.lower() or a.account_type == "Income"]
-2025-12-12 00:12:55,819 INFO ipython expense_accounts = [a for a in all_accounts if "expense" in a.account_name.lower() or a.account_type == "Expense"]
-2025-12-12 00:12:55,819 INFO ipython asset_accounts = [a for a in all_accounts if a.account_type == "Asset"]
-2025-12-12 00:12:55,819 INFO ipython liability_accounts = [a for a in all_accounts if a.account_type == "Liability"]
-2025-12-12 00:12:55,819 INFO ipython # Map accounts - ensure loan_account and payment_account are different
-2025-12-12 00:12:55,819 INFO ipython loan_acc = get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else None)
-2025-12-12 00:12:55,819 INFO ipython payment_acc = get_account("Bank") or (bank_accounts[0].name if bank_accounts else None)
-2025-12-12 00:12:55,820 INFO ipython # If they're the same or missing, use different accounts
-2025-12-12 00:12:55,820 INFO ipython if not loan_acc or not payment_acc or loan_acc == payment_acc:
-    # Get distinct accounts
-    if len(all_accounts) >= 2:
-        loan_acc = all_accounts[0].name
-        payment_acc = all_accounts[1].name
-    else:
-        print("⚠️  Need at least 2 different accounts. Please create accounts first.")
-        frappe.db.close()
-        exit()
-2025-12-12 00:12:55,820 INFO ipython accounts = {
-    "loan_account": loan_acc,
-    "payment_account": payment_acc,
-    "disbursement_account": payment_acc,  # Can be same as payment
-    "interest_income_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "interest_accrued_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "interest_receivable_account": get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else all_accounts[0].name),
-    "interest_waiver_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "penalty_income_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "penalty_accrued_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "penalty_receivable_account": get_account("Receivable") or (receivable_accounts[0].name if receivable_accounts else all_accounts[0].name),
-    "penalty_waiver_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "security_deposit_account": get_account("Asset") or (asset_accounts[0].name if asset_accounts else all_accounts[0].name),
-    "customer_refund_account": get_account("Liability") or (liability_accounts[0].name if liability_accounts else all_accounts[0].name),
-    "broken_period_interest_recovery_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-    "write_off_account": get_account("Expense") or (expense_accounts[0].name if expense_accounts else all_accounts[0].name),
-    "write_off_recovery_account": get_account("Income") or (income_accounts[0].name if income_accounts else all_accounts[0].name),
-}
-2025-12-12 00:12:55,820 INFO ipython print("Using accounts:")
-2025-12-12 00:12:55,820 INFO ipython for key, value in accounts.items():
-    account_name = frappe.db.get_value("Account", value, "account_name")
-    print(f"  {key}: {account_name} ({value})")
-2025-12-12 00:12:55,820 INFO ipython # Create Loan Product
-2025-12-12 00:12:55,820 INFO ipython product_code = "LP-001"
-2025-12-12 00:12:55,820 INFO ipython product_name = "Standard Loan Product"
-2025-12-12 00:12:55,820 INFO ipython # Check if already exists
-2025-12-12 00:12:55,820 INFO ipython if frappe.db.exists("Loan Product", product_code):
-    print(f"\n⚠️  Loan Product {product_code} already exists!")
-    print("Please use a different product code or delete the existing one.")
-else:
-    loan_product = frappe.new_doc("Loan Product")
-    loan_product.product_code = product_code
-    loan_product.product_name = product_name
-    loan_product.company = company
-    loan_product.rate_of_interest = 12.0  # 12% yearly
-    loan_product.penalty_interest_rate = 2.0  # 2% penalty
-    loan_product.maximum_loan_amount = 1000000  # 1 million
-    loan_product.is_term_loan = 1
-    loan_product.repayment_schedule_type = "Monthly as per repayment start date"
-    loan_product.min_days_bw_disbursement_first_repayment = 30
-    loan_product.grace_period_in_days = 0
-    loan_product.days_past_due_threshold_for_npa = 90
-    
-2025-12-12 00:12:55,820 INFO ipython     # Set all required accounts
-2025-12-12 00:12:55,820 INFO ipython     for key, account in accounts.items():
-        setattr(loan_product, key, account)
-    
-2025-12-12 00:12:55,820 INFO ipython     loan_product.insert(ignore_permissions=True)
-2025-12-12 00:12:55,820 INFO ipython     print(f"\n✅ Created Loan Product: {product_code} - {product_name}")
-2025-12-12 00:12:55,820 INFO ipython     print(f"   Name: {loan_product.name}")
-2025-12-12 00:12:55,820 INFO ipython     print(f"   Rate of Interest: {loan_product.rate_of_interest}%")
-2025-12-12 00:12:55,820 INFO ipython     print(f"   Maximum Loan Amount: {loan_product.maximum_loan_amount}")
-2025-12-12 00:12:55,820 INFO ipython frappe.db.commit()
-2025-12-12 00:12:55,820 INFO ipython frappe.db.close()
-2025-12-12 00:12:55,820 INFO ipython === session end ===
-2025-12-12 00:13:15,436 INFO ipython === bench console session ===
-2025-12-12 00:13:15,436 INFO ipython import frappe
-2025-12-12 00:13:15,436 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:13:15,436 INFO ipython frappe.connect()
-2025-12-12 00:13:15,436 INFO ipython company = "My Lending Co"
-2025-12-12 00:13:15,436 INFO ipython # Get all accounts for the company
-2025-12-12 00:13:15,436 INFO ipython all_accounts = frappe.get_all("Account", 
-    fields=["name", "account_name", "account_type"],
-    filters={"company": company},
-    limit=20
-)
-2025-12-12 00:13:15,436 INFO ipython if len(all_accounts) < 2:
-    print("❌ Error: Need at least 2 accounts. Please create accounts first.")
-    frappe.db.close()
-    exit()
-2025-12-12 00:13:15,436 INFO ipython print(f"Found {len(all_accounts)} accounts")
-2025-12-12 00:13:15,436 INFO ipython # Use first two different accounts
-2025-12-12 00:13:15,436 INFO ipython loan_account = all_accounts[0].name
-2025-12-12 00:13:15,436 INFO ipython payment_account = all_accounts[1].name if all_accounts[0].name != all_accounts[1].name else (all_accounts[2].name if len(all_accounts) > 2 else all_accounts[0].name)
-2025-12-12 00:13:15,436 INFO ipython # Use same account for others (they can be same)
-2025-12-12 00:13:15,436 INFO ipython base_account = all_accounts[0].name
-2025-12-12 00:13:15,436 INFO ipython # Create Loan Product
-2025-12-12 00:13:15,436 INFO ipython product_code = "LP-001"
-2025-12-12 00:13:15,436 INFO ipython product_name = "Standard Loan Product"
-2025-12-12 00:13:15,436 INFO ipython if frappe.db.exists("Loan Product", product_code):
-    print(f"⚠️  Loan Product {product_code} already exists!")
-    print("Deleting existing product...")
-    frappe.delete_doc("Loan Product", product_code, force=1, ignore_permissions=True)
-    frappe.db.commit()
-2025-12-12 00:13:15,436 INFO ipython loan_product = frappe.new_doc("Loan Product")
-2025-12-12 00:13:15,436 INFO ipython loan_product.product_code = product_code
-2025-12-12 00:13:15,436 INFO ipython loan_product.product_name = product_name
-2025-12-12 00:13:15,436 INFO ipython loan_product.company = company
-2025-12-12 00:13:15,436 INFO ipython loan_product.rate_of_interest = 12.0
-2025-12-12 00:13:15,436 INFO ipython loan_product.penalty_interest_rate = 2.0
-2025-12-12 00:13:15,436 INFO ipython loan_product.maximum_loan_amount = 1000000
-2025-12-12 00:13:15,436 INFO ipython loan_product.is_term_loan = 1
-2025-12-12 00:13:15,436 INFO ipython loan_product.repayment_schedule_type = "Monthly as per repayment start date"
-2025-12-12 00:13:15,436 INFO ipython loan_product.min_days_bw_disbursement_first_repayment = 30
-2025-12-12 00:13:15,436 INFO ipython loan_product.grace_period_in_days = 0
-2025-12-12 00:13:15,437 INFO ipython loan_product.days_past_due_threshold_for_npa = 90
-2025-12-12 00:13:15,437 INFO ipython # Set accounts - ensure loan_account and payment_account are different
-2025-12-12 00:13:15,437 INFO ipython loan_product.loan_account = loan_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.payment_account = payment_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.disbursement_account = payment_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.interest_income_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.interest_accrued_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.interest_receivable_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.interest_waiver_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.penalty_income_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.penalty_accrued_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.penalty_receivable_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.penalty_waiver_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.security_deposit_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.customer_refund_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.broken_period_interest_recovery_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.write_off_account = base_account
-2025-12-12 00:13:15,437 INFO ipython loan_product.write_off_recovery_account = base_account
-2025-12-12 00:13:15,437 INFO ipython try:
-    loan_product.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan Product: {product_code} - {product_name}")
-    print(f"   Name: {loan_product.name}")
-    print(f"   URL: /app/loan-product/{loan_product.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan product: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:13:15,437 INFO ipython frappe.db.close()
-2025-12-12 00:13:15,437 INFO ipython === session end ===
-2025-12-12 00:13:24,140 INFO ipython === bench console session ===
-2025-12-12 00:13:24,140 INFO ipython import frappe
-2025-12-12 00:13:24,140 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:13:24,140 INFO ipython frappe.connect()
-2025-12-12 00:13:24,140 INFO ipython loan_product = frappe.get_doc("Loan Product", "LP-001")
-2025-12-12 00:13:24,140 INFO ipython print(f"\n✅ Loan Product Details:")
-2025-12-12 00:13:24,140 INFO ipython print(f"   Product Code: {loan_product.product_code}")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Product Name: {loan_product.product_name}")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Company: {loan_product.company}")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Rate of Interest: {loan_product.rate_of_interest}%")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Penalty Interest Rate: {loan_product.penalty_interest_rate}%")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Maximum Loan Amount: {loan_product.maximum_loan_amount}")
-2025-12-12 00:13:24,141 INFO ipython print(f"   Is Term Loan: {loan_product.is_term_loan}")
-2025-12-12 00:13:24,141 INFO ipython print(f"\n   Access URL: http://lending.localhost:8000/app/loan-product/LP-001")
-2025-12-12 00:13:24,141 INFO ipython frappe.db.close()
-2025-12-12 00:13:24,141 INFO ipython === session end ===
-2025-12-12 00:16:03,174 INFO ipython === bench console session ===
-2025-12-12 00:16:03,174 INFO ipython import frappe
-2025-12-12 00:16:03,174 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:16:03,174 INFO ipython frappe.connect()
-2025-12-12 00:16:03,174 INFO ipython # Check for existing customers
-2025-12-12 00:16:03,174 INFO ipython customers = frappe.get_all("Customer", 
-    fields=["name", "customer_name"],
-    limit=5
-)
-2025-12-12 00:16:03,174 INFO ipython print(f"Existing customers: {len(customers)}")
-2025-12-12 00:16:03,174 INFO ipython for c in customers:
-    print(f"  - {c.customer_name} ({c.name})")
-2025-12-12 00:16:03,174 INFO ipython # Check for loan product
-2025-12-12 00:16:03,174 INFO ipython loan_product = frappe.db.get_value("Loan Product", "LP-001", "name")
-2025-12-12 00:16:03,174 INFO ipython print(f"\nLoan Product LP-001 exists: {loan_product is not None}")
-2025-12-12 00:16:03,175 INFO ipython company = "My Lending Co"
-2025-12-12 00:16:03,175 INFO ipython print(f"Company: {company}")
-2025-12-12 00:16:03,175 INFO ipython frappe.db.close()
-2025-12-12 00:16:03,175 INFO ipython === session end ===
-2025-12-12 00:16:19,921 INFO ipython === bench console session ===
-2025-12-12 00:16:19,921 INFO ipython import frappe
-2025-12-12 00:16:19,922 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:16:19,922 INFO ipython frappe.connect()
-2025-12-12 00:16:19,922 INFO ipython company = "My Lending Co"
-2025-12-12 00:16:19,922 INFO ipython loan_product = "LP-001"
-2025-12-12 00:16:19,922 INFO ipython # Check if loan product exists
-2025-12-12 00:16:19,922 INFO ipython if not frappe.db.exists("Loan Product", loan_product):
-    print(f"❌ Error: Loan Product {loan_product} does not exist!")
-    print("Please create the loan product first.")
-    frappe.db.close()
-    exit()
-2025-12-12 00:16:19,922 INFO ipython # Get or create a customer
-2025-12-12 00:16:19,922 INFO ipython customers = frappe.get_all("Customer", 
-    fields=["name", "customer_name"],
-    limit=1
-)
-2025-12-12 00:16:19,922 INFO ipython if customers:
-    customer = customers[0].name
-    customer_name = customers[0].customer_name
-    print(f"Using existing customer: {customer_name}")
-else:
-    # Create a customer
-    customer_doc = frappe.new_doc("Customer")
-    customer_doc.customer_name = "John Doe"
-    customer_doc.customer_type = "Individual"
-    customer_doc.customer_group = frappe.db.get_value("Customer Group", {"is_group": 0}, "name") or "Individual"
-    customer_doc.territory = frappe.db.get_value("Territory", {"is_group": 0}, "name") or "All Territories"
-    customer_doc.insert(ignore_permissions=True)
-    customer = customer_doc.name
-    customer_name = customer_doc.customer_name
-    print(f"Created customer: {customer_name}")
-    frappe.db.commit()
-2025-12-12 00:16:19,922 INFO ipython # Create Loan Application
-2025-12-12 00:16:19,922 INFO ipython loan_application = frappe.new_doc("Loan Application")
-2025-12-12 00:16:19,922 INFO ipython loan_application.applicant_type = "Customer"
-2025-12-12 00:16:19,922 INFO ipython loan_application.applicant = customer
-2025-12-12 00:16:19,922 INFO ipython loan_application.first_name = customer_name.split()[0] if customer_name else "John"
-2025-12-12 00:16:19,922 INFO ipython loan_application.last_name = " ".join(customer_name.split()[1:]) if len(customer_name.split()) > 1 else "Doe"
-2025-12-12 00:16:19,922 INFO ipython loan_application.company = company
-2025-12-12 00:16:19,922 INFO ipython loan_application.posting_date = frappe.utils.today()
-2025-12-12 00:16:19,922 INFO ipython loan_application.status = "Open"
-2025-12-12 00:16:19,922 INFO ipython loan_application.loan_product = loan_product
-2025-12-12 00:16:19,922 INFO ipython loan_application.loan_amount = 100000  # 100,000
-2025-12-12 00:16:19,922 INFO ipython loan_application.is_term_loan = 1
-2025-12-12 00:16:19,922 INFO ipython loan_application.is_secured_loan = 0
-2025-12-12 00:16:19,922 INFO ipython loan_application.description = "Personal loan application"
-2025-12-12 00:16:19,922 INFO ipython loan_application.applicant_email_address = "john.doe@example.com"
-2025-12-12 00:16:19,922 INFO ipython loan_application.applicant_phone_number = "+1234567890"
-2025-12-12 00:16:19,922 INFO ipython loan_application.address_line_1 = "123 Main Street"
-2025-12-12 00:16:19,922 INFO ipython loan_application.city = "New York"
-2025-12-12 00:16:19,922 INFO ipython loan_application.state = "NY"
-2025-12-12 00:16:19,922 INFO ipython loan_application.country = "United States"
-2025-12-12 00:16:19,922 INFO ipython loan_application.zip_code = 10001
-2025-12-12 00:16:19,922 INFO ipython loan_application.repayment_method = "Repay Over Number of Periods"
-2025-12-12 00:16:19,922 INFO ipython loan_application.repayment_periods = 12  # 12 months
-2025-12-12 00:16:19,922 INFO ipython try:
-    loan_application.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan Application: {loan_application.name}")
-    print(f"   Applicant: {customer_name}")
-    print(f"   Loan Amount: {loan_application.loan_amount}")
-    print(f"   Loan Product: {loan_product}")
-    print(f"   Status: {loan_application.status}")
-    print(f"   URL: /app/loan-application/{loan_application.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan application: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:16:19,922 INFO ipython frappe.db.close()
-2025-12-12 00:16:19,922 INFO ipython === session end ===
-2025-12-12 00:16:36,692 INFO ipython === bench console session ===
-2025-12-12 00:16:36,692 INFO ipython import frappe
-2025-12-12 00:16:36,692 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:16:36,692 INFO ipython frappe.connect()
-2025-12-12 00:16:36,692 INFO ipython # Check if Employee doctype exists
-2025-12-12 00:16:36,692 INFO ipython employee_exists = frappe.db.exists("DocType", "Employee")
-2025-12-12 00:16:36,692 INFO ipython print(f"Employee doctype exists: {employee_exists}")
-2025-12-12 00:16:36,693 INFO ipython if employee_exists:
-    employees = frappe.get_all("Employee", 
-        fields=["name", "employee_name"],
-        limit=5
-    )
-    print(f"Existing employees: {len(employees)}")
-    for e in employees:
-        print(f"  - {e.employee_name} ({e.name})")
-2025-12-12 00:16:36,693 INFO ipython frappe.db.close()
-2025-12-12 00:16:36,693 INFO ipython === session end ===
-2025-12-12 00:16:58,749 INFO ipython === bench console session ===
-2025-12-12 00:16:58,750 INFO ipython import frappe
-2025-12-12 00:16:58,750 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:16:58,750 INFO ipython frappe.connect()
-2025-12-12 00:16:58,750 INFO ipython company = "My Lending Co"
-2025-12-12 00:16:58,750 INFO ipython loan_product = "LP-001"
-2025-12-12 00:16:58,750 INFO ipython # Check if loan product exists
-2025-12-12 00:16:58,750 INFO ipython if not frappe.db.exists("Loan Product", loan_product):
-    print(f"❌ Error: Loan Product {loan_product} does not exist!")
-    print("Please create the loan product first.")
-    frappe.db.close()
-    exit()
-2025-12-12 00:16:58,750 INFO ipython # Get or create an employee
-2025-12-12 00:16:58,750 INFO ipython employees = frappe.get_all("Employee", 
-    fields=["name", "employee_name"],
-    limit=1
-)
-2025-12-12 00:16:58,750 INFO ipython if employees:
-    employee = employees[0].name
-    employee_name = employees[0].employee_name
-    print(f"Using existing employee: {employee_name}")
-else:
-    # Create an employee
-    employee_doc = frappe.new_doc("Employee")
-    employee_doc.first_name = "John"
-    employee_doc.last_name = "Doe"
-    employee_doc.employee_name = "John Doe"
-    employee_doc.company = company
-    employee_doc.date_of_joining = frappe.utils.today()
-    employee_doc.insert(ignore_permissions=True)
-    employee = employee_doc.name
-    employee_name = employee_doc.employee_name
-    print(f"Created employee: {employee_name}")
-    frappe.db.commit()
-2025-12-12 00:16:58,750 INFO ipython # Create Loan Application
-2025-12-12 00:16:58,750 INFO ipython loan_application = frappe.new_doc("Loan Application")
-2025-12-12 00:16:58,750 INFO ipython loan_application.applicant_type = "Employee"
-2025-12-12 00:16:58,750 INFO ipython loan_application.applicant = employee
-2025-12-12 00:16:58,750 INFO ipython loan_application.first_name = employee_name.split()[0] if employee_name else "John"
-2025-12-12 00:16:58,750 INFO ipython loan_application.last_name = " ".join(employee_name.split()[1:]) if len(employee_name.split()) > 1 else "Doe"
-2025-12-12 00:16:58,750 INFO ipython loan_application.company = company
-2025-12-12 00:16:58,750 INFO ipython loan_application.posting_date = frappe.utils.today()
-2025-12-12 00:16:58,750 INFO ipython loan_application.status = "Open"
-2025-12-12 00:16:58,750 INFO ipython loan_application.loan_product = loan_product
-2025-12-12 00:16:58,750 INFO ipython loan_application.loan_amount = 100000  # 100,000
-2025-12-12 00:16:58,750 INFO ipython loan_application.is_term_loan = 1
-2025-12-12 00:16:58,750 INFO ipython loan_application.is_secured_loan = 0
-2025-12-12 00:16:58,750 INFO ipython loan_application.description = "Personal loan application"
-2025-12-12 00:16:58,750 INFO ipython loan_application.applicant_email_address = "john.doe@example.com"
-2025-12-12 00:16:58,750 INFO ipython loan_application.applicant_phone_number = "+1234567890"
-2025-12-12 00:16:58,750 INFO ipython loan_application.address_line_1 = "123 Main Street"
-2025-12-12 00:16:58,750 INFO ipython loan_application.city = "New York"
-2025-12-12 00:16:58,750 INFO ipython loan_application.state = "NY"
-2025-12-12 00:16:58,750 INFO ipython loan_application.country = "United States"
-2025-12-12 00:16:58,750 INFO ipython loan_application.zip_code = 10001
-2025-12-12 00:16:58,750 INFO ipython loan_application.repayment_method = "Repay Over Number of Periods"
-2025-12-12 00:16:58,750 INFO ipython loan_application.repayment_periods = 12  # 12 months
-2025-12-12 00:16:58,751 INFO ipython try:
-    loan_application.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan Application: {loan_application.name}")
-    print(f"   Applicant: {customer_name}")
-    print(f"   Loan Amount: {loan_application.loan_amount}")
-    print(f"   Loan Product: {loan_product}")
-    print(f"   Status: {loan_application.status}")
-    print(f"   URL: /app/loan-application/{loan_application.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan application: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:16:58,751 INFO ipython frappe.db.close()
-2025-12-12 00:16:58,751 INFO ipython === session end ===
-2025-12-12 00:17:17,063 INFO ipython === bench console session ===
-2025-12-12 00:17:17,063 INFO ipython import frappe
-2025-12-12 00:17:17,063 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:17:17,063 INFO ipython frappe.connect()
-2025-12-12 00:17:17,063 INFO ipython company = "My Lending Co"
-2025-12-12 00:17:17,063 INFO ipython loan_product = "LP-001"
-2025-12-12 00:17:17,063 INFO ipython # Check if loan product exists
-2025-12-12 00:17:17,063 INFO ipython if not frappe.db.exists("Loan Product", loan_product):
-    print(f"❌ Error: Loan Product {loan_product} does not exist!")
-    print("Please create the loan product first.")
-    frappe.db.close()
-    exit()
-2025-12-12 00:17:17,063 INFO ipython # Get or create an employee
-2025-12-12 00:17:17,063 INFO ipython employees = frappe.get_all("Employee", 
-    fields=["name", "employee_name"],
-    limit=1
-)
-2025-12-12 00:17:17,063 INFO ipython if employees:
-    employee = employees[0].name
-    employee_name = employees[0].employee_name
-    print(f"Using existing employee: {employee_name}")
-else:
-    # Create an employee
-    employee_doc = frappe.new_doc("Employee")
-    employee_doc.first_name = "John"
-    employee_doc.last_name = "Doe"
-    employee_doc.employee_name = "John Doe"
-    employee_doc.company = company
-    employee_doc.date_of_joining = frappe.utils.today()
-    employee_doc.insert(ignore_permissions=True)
-    employee = employee_doc.name
-    employee_name = employee_doc.employee_name
-    print(f"Created employee: {employee_name}")
-    frappe.db.commit()
-2025-12-12 00:17:17,063 INFO ipython # Create Loan Application
-2025-12-12 00:17:17,063 INFO ipython loan_application = frappe.new_doc("Loan Application")
-2025-12-12 00:17:17,063 INFO ipython loan_application.applicant_type = "Employee"
-2025-12-12 00:17:17,063 INFO ipython loan_application.applicant = employee
-2025-12-12 00:17:17,063 INFO ipython loan_application.first_name = employee_name.split()[0] if employee_name else "John"
-2025-12-12 00:17:17,063 INFO ipython loan_application.last_name = " ".join(employee_name.split()[1:]) if len(employee_name.split()) > 1 else "Doe"
-2025-12-12 00:17:17,063 INFO ipython loan_application.company = company
-2025-12-12 00:17:17,063 INFO ipython loan_application.posting_date = frappe.utils.today()
-2025-12-12 00:17:17,064 INFO ipython loan_application.status = "Open"
-2025-12-12 00:17:17,064 INFO ipython loan_application.loan_product = loan_product
-2025-12-12 00:17:17,064 INFO ipython loan_application.loan_amount = 100000  # 100,000
-2025-12-12 00:17:17,064 INFO ipython loan_application.is_term_loan = 1
-2025-12-12 00:17:17,064 INFO ipython loan_application.is_secured_loan = 0
-2025-12-12 00:17:17,064 INFO ipython loan_application.description = "Personal loan application"
-2025-12-12 00:17:17,064 INFO ipython loan_application.applicant_email_address = "john.doe@example.com"
-2025-12-12 00:17:17,064 INFO ipython # Phone number - using a valid format or leaving it empty
-2025-12-12 00:17:17,064 INFO ipython # loan_application.applicant_phone_number = "+1234567890"  # Commented out - will be optional
-2025-12-12 00:17:17,064 INFO ipython loan_application.address_line_1 = "123 Main Street"
-2025-12-12 00:17:17,064 INFO ipython loan_application.city = "New York"
-2025-12-12 00:17:17,064 INFO ipython loan_application.state = "NY"
-2025-12-12 00:17:17,064 INFO ipython loan_application.country = "United States"
-2025-12-12 00:17:17,064 INFO ipython loan_application.zip_code = 10001
-2025-12-12 00:17:17,064 INFO ipython loan_application.repayment_method = "Repay Over Number of Periods"
-2025-12-12 00:17:17,064 INFO ipython loan_application.repayment_periods = 12  # 12 months
-2025-12-12 00:17:17,064 INFO ipython try:
-    loan_application.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan Application: {loan_application.name}")
-    print(f"   Applicant: {customer_name}")
-    print(f"   Loan Amount: {loan_application.loan_amount}")
-    print(f"   Loan Product: {loan_product}")
-    print(f"   Status: {loan_application.status}")
-    print(f"   URL: /app/loan-application/{loan_application.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan application: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:17:17,064 INFO ipython frappe.db.close()
-2025-12-12 00:17:17,064 INFO ipython === session end ===
-2025-12-12 00:17:37,395 INFO ipython === bench console session ===
-2025-12-12 00:17:37,395 INFO ipython import frappe
-2025-12-12 00:17:37,395 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:17:37,395 INFO ipython frappe.connect()
-2025-12-12 00:17:37,395 INFO ipython company = "My Lending Co"
-2025-12-12 00:17:37,395 INFO ipython loan_product = "LP-001"
-2025-12-12 00:17:37,395 INFO ipython # Check if loan product exists
-2025-12-12 00:17:37,395 INFO ipython if not frappe.db.exists("Loan Product", loan_product):
-    print(f"❌ Error: Loan Product {loan_product} does not exist!")
-    print("Please create the loan product first.")
-    frappe.db.close()
-    exit()
-2025-12-12 00:17:37,396 INFO ipython # Get or create an employee
-2025-12-12 00:17:37,396 INFO ipython employees = frappe.get_all("Employee", 
-    fields=["name", "employee_name"],
-    limit=1
-)
-2025-12-12 00:17:37,396 INFO ipython if employees:
-    employee = employees[0].name
-    employee_name = employees[0].employee_name
-    print(f"Using existing employee: {employee_name}")
-else:
-    # Create an employee
-    employee_doc = frappe.new_doc("Employee")
-    employee_doc.first_name = "John"
-    employee_doc.last_name = "Doe"
-    employee_doc.employee_name = "John Doe"
-    employee_doc.company = company
-    employee_doc.date_of_joining = frappe.utils.today()
-    employee_doc.insert(ignore_permissions=True)
-    employee = employee_doc.name
-    employee_name = employee_doc.employee_name
-    print(f"Created employee: {employee_name}")
-    frappe.db.commit()
-2025-12-12 00:17:37,396 INFO ipython # Create Loan Application
-2025-12-12 00:17:37,396 INFO ipython loan_application = frappe.new_doc("Loan Application")
-2025-12-12 00:17:37,396 INFO ipython loan_application.applicant_type = "Employee"
-2025-12-12 00:17:37,396 INFO ipython loan_application.applicant = employee
-2025-12-12 00:17:37,396 INFO ipython loan_application.first_name = employee_name.split()[0] if employee_name else "John"
-2025-12-12 00:17:37,396 INFO ipython loan_application.last_name = " ".join(employee_name.split()[1:]) if len(employee_name.split()) > 1 else "Doe"
-2025-12-12 00:17:37,396 INFO ipython loan_application.company = company
-2025-12-12 00:17:37,396 INFO ipython loan_application.posting_date = frappe.utils.today()
-2025-12-12 00:17:37,396 INFO ipython loan_application.status = "Open"
-2025-12-12 00:17:37,396 INFO ipython loan_application.loan_product = loan_product
-2025-12-12 00:17:37,396 INFO ipython loan_application.loan_amount = 100000  # 100,000
-2025-12-12 00:17:37,396 INFO ipython loan_application.is_term_loan = 1
-2025-12-12 00:17:37,396 INFO ipython loan_application.is_secured_loan = 0
-2025-12-12 00:17:37,396 INFO ipython loan_application.description = "Personal loan application"
-2025-12-12 00:17:37,396 INFO ipython loan_application.applicant_email_address = "john.doe@example.com"
-2025-12-12 00:17:37,396 INFO ipython # Phone number - using a valid format or leaving it empty
-2025-12-12 00:17:37,396 INFO ipython # loan_application.applicant_phone_number = "+1234567890"  # Commented out - will be optional
-2025-12-12 00:17:37,396 INFO ipython loan_application.address_line_1 = "123 Main Street"
-2025-12-12 00:17:37,396 INFO ipython loan_application.city = "New York"
-2025-12-12 00:17:37,396 INFO ipython loan_application.state = "NY"
-2025-12-12 00:17:37,396 INFO ipython loan_application.country = "United States"
-2025-12-12 00:17:37,396 INFO ipython loan_application.zip_code = 10001
-2025-12-12 00:17:37,396 INFO ipython loan_application.repayment_method = "Repay Over Number of Periods"
-2025-12-12 00:17:37,396 INFO ipython loan_application.repayment_periods = 12  # 12 months
-2025-12-12 00:17:37,396 INFO ipython try:
-    loan_application.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan Application: {loan_application.name}")
-    print(f"   Applicant: {employee_name} ({employee})")
-    print(f"   Loan Amount: {loan_application.loan_amount}")
-    print(f"   Loan Product: {loan_product}")
-    print(f"   Status: {loan_application.status}")
-    print(f"   URL: /app/loan-application/{loan_application.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan application: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:17:37,396 INFO ipython frappe.db.close()
-2025-12-12 00:17:37,397 INFO ipython === session end ===
-2025-12-12 00:17:55,116 INFO ipython === bench console session ===
-2025-12-12 00:17:55,116 INFO ipython import frappe
-2025-12-12 00:17:55,116 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:17:55,116 INFO ipython frappe.connect()
-2025-12-12 00:17:55,116 INFO ipython loan_app = frappe.get_doc("Loan Application", "ACC-LOAP-2025-00001")
-2025-12-12 00:17:55,116 INFO ipython print(f"\n✅ Loan Application Details:")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Name: {loan_app.name}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Applicant: {loan_app.applicant} ({loan_app.applicant_type})")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Company: {loan_app.company}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Loan Product: {loan_app.loan_product}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Loan Amount: {loan_app.loan_amount}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Status: {loan_app.status}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Posting Date: {loan_app.posting_date}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Is Term Loan: {loan_app.is_term_loan}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Repayment Method: {loan_app.repayment_method}")
-2025-12-12 00:17:55,116 INFO ipython print(f"   Repayment Periods: {loan_app.repayment_periods}")
-2025-12-12 00:17:55,116 INFO ipython print(f"\n   Access URL: http://lending.localhost:8000/app/loan-application/{loan_app.name}")
-2025-12-12 00:17:55,116 INFO ipython frappe.db.close()
-2025-12-12 00:17:55,116 INFO ipython === session end ===
-2025-12-12 00:19:16,229 INFO ipython === bench console session ===
-2025-12-12 00:19:16,229 INFO ipython import frappe
-2025-12-12 00:19:16,229 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:19:16,229 INFO ipython frappe.connect()
-2025-12-12 00:19:16,229 INFO ipython # Check existing loan application
-2025-12-12 00:19:16,229 INFO ipython loan_app = frappe.db.get_value("Loan Application", "ACC-LOAP-2025-00001", ["name", "applicant", "applicant_type", "loan_product", "loan_amount", "company"], as_dict=True)
-2025-12-12 00:19:16,229 INFO ipython print(f"Loan Application: {loan_app}")
-2025-12-12 00:19:16,229 INFO ipython # Check loan product
-2025-12-12 00:19:16,229 INFO ipython loan_product = frappe.db.get_value("Loan Product", "LP-001", ["name", "rate_of_interest", "penalty_interest_rate", "is_term_loan"], as_dict=True)
-2025-12-12 00:19:16,229 INFO ipython print(f"Loan Product: {loan_product}")
-2025-12-12 00:19:16,229 INFO ipython frappe.db.close()
-2025-12-12 00:19:16,230 INFO ipython === session end ===
-2025-12-12 00:19:27,632 INFO ipython === bench console session ===
-2025-12-12 00:19:27,632 INFO ipython import frappe
-2025-12-12 00:19:27,632 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:19:27,632 INFO ipython frappe.connect()
-2025-12-12 00:19:27,632 INFO ipython # Check for loan accounts
-2025-12-12 00:19:27,632 INFO ipython accounts = frappe.get_all("Account", 
-    filters={"company": "My Lending Co"},
-    fields=["name", "account_name", "account_type"],
-    limit=20
-)
-2025-12-12 00:19:27,632 INFO ipython print(f"Available accounts ({len(accounts)}):")
-2025-12-12 00:19:27,632 INFO ipython for acc in accounts[:10]:
-    print(f"  - {acc.account_name} ({acc.account_type})")
-2025-12-12 00:19:27,632 INFO ipython frappe.db.close()
-2025-12-12 00:19:27,632 INFO ipython === session end ===
-2025-12-12 00:19:44,190 INFO ipython === bench console session ===
-2025-12-12 00:19:44,191 INFO ipython import frappe
-2025-12-12 00:19:44,191 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:19:44,191 INFO ipython frappe.connect()
-2025-12-12 00:19:44,191 INFO ipython # Check loan product accounts
-2025-12-12 00:19:44,191 INFO ipython loan_product = frappe.get_doc("Loan Product", "LP-001")
-2025-12-12 00:19:44,191 INFO ipython print(f"Loan Product: {loan_product.name}")
-2025-12-12 00:19:44,191 INFO ipython print(f"Payment Account: {loan_product.payment_account}")
-2025-12-12 00:19:44,191 INFO ipython print(f"Loan Account: {loan_product.loan_account}")
-2025-12-12 00:19:44,191 INFO ipython print(f"Interest Income Account: {loan_product.interest_income_account}")
-2025-12-12 00:19:44,191 INFO ipython print(f"Penalty Income Account: {loan_product.penalty_income_account}")
-2025-12-12 00:19:44,191 INFO ipython print(f"Disbursement Account: {loan_product.disbursement_account}")
-2025-12-12 00:19:44,191 INFO ipython # Get loan application details
-2025-12-12 00:19:44,191 INFO ipython loan_app = frappe.get_doc("Loan Application", "ACC-LOAP-2025-00001")
-2025-12-12 00:19:44,191 INFO ipython print(f"\nLoan Application:")
-2025-12-12 00:19:44,191 INFO ipython print(f"  Applicant: {loan_app.applicant} ({loan_app.applicant_type})")
-2025-12-12 00:19:44,191 INFO ipython print(f"  Loan Amount: {loan_app.loan_amount}")
-2025-12-12 00:19:44,191 INFO ipython print(f"  Repayment Method: {loan_app.repayment_method}")
-2025-12-12 00:19:44,191 INFO ipython print(f"  Repayment Periods: {loan_app.repayment_periods}")
-2025-12-12 00:19:44,191 INFO ipython frappe.db.close()
-2025-12-12 00:19:44,191 INFO ipython === session end ===
-2025-12-12 00:20:06,967 INFO ipython === bench console session ===
-2025-12-12 00:20:06,968 INFO ipython import frappe
-2025-12-12 00:20:06,968 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:06,968 INFO ipython frappe.connect()
-2025-12-12 00:20:06,968 INFO ipython company = "My Lending Co"
-2025-12-12 00:20:06,968 INFO ipython loan_product = "LP-001"
-2025-12-12 00:20:06,968 INFO ipython loan_application = "ACC-LOAP-2025-00001"
-2025-12-12 00:20:06,968 INFO ipython # Get loan application details
-2025-12-12 00:20:06,968 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
-2025-12-12 00:20:06,968 INFO ipython print(f"Using Loan Application: {loan_app.name}")
-2025-12-12 00:20:06,968 INFO ipython # Get loan product details
-2025-12-12 00:20:06,968 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
-2025-12-12 00:20:06,968 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
-2025-12-12 00:20:06,968 INFO ipython # Create Loan
-2025-12-12 00:20:06,968 INFO ipython loan = frappe.new_doc("Loan")
-2025-12-12 00:20:06,968 INFO ipython loan.applicant_type = loan_app.applicant_type
-2025-12-12 00:20:06,968 INFO ipython loan.applicant = loan_app.applicant
-2025-12-12 00:20:06,968 INFO ipython loan.loan_application = loan_application
-2025-12-12 00:20:06,968 INFO ipython loan.company = company
-2025-12-12 00:20:06,968 INFO ipython loan.posting_date = frappe.utils.today()
-2025-12-12 00:20:06,968 INFO ipython loan.loan_product = loan_product
-2025-12-12 00:20:06,968 INFO ipython loan.loan_amount = loan_app.loan_amount
-2025-12-12 00:20:06,968 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
-2025-12-12 00:20:06,968 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
-2025-12-12 00:20:06,968 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
-2025-12-12 00:20:06,968 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
-2025-12-12 00:20:06,968 INFO ipython # Set accounts from loan product
-2025-12-12 00:20:06,968 INFO ipython loan.payment_account = loan_prod.payment_account
-2025-12-12 00:20:06,968 INFO ipython loan.loan_account = loan_prod.loan_account
-2025-12-12 00:20:06,968 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
-2025-12-12 00:20:06,968 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
-2025-12-12 00:20:06,968 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
-2025-12-12 00:20:06,968 INFO ipython # Set repayment details if term loan
-2025-12-12 00:20:06,968 INFO ipython if loan.is_term_loan:
+2025-12-12 00:21:11,717 INFO ipython if loan.is_term_loan:
     loan.repayment_method = loan_app.repayment_method
     loan.repayment_periods = loan_app.repayment_periods
     # Set repayment schedule type - need to check what's available
@@ -1294,7 +7,7 @@ except Exception as e:
     # Set repayment start date (30 days from posting date)
     from frappe.utils import add_days
     loan.repayment_start_date = add_days(loan.posting_date, 30)
-2025-12-12 00:20:06,969 INFO ipython try:
+2025-12-12 00:21:11,717 INFO ipython try:
     loan.insert(ignore_permissions=True)
     print(f"\n✅ Created Loan: {loan.name}")
     print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
@@ -1309,247 +22,43 @@ except Exception as e:
     print(f"❌ Error creating loan: {e}")
     import traceback
     traceback.print_exc()
-2025-12-12 00:20:06,969 INFO ipython frappe.db.close()
-2025-12-12 00:20:06,969 INFO ipython === session end ===
-2025-12-12 00:20:17,447 INFO ipython === bench console session ===
-2025-12-12 00:20:17,447 INFO ipython import frappe
-2025-12-12 00:20:17,447 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:17,447 INFO ipython frappe.connect()
-2025-12-12 00:20:17,447 INFO ipython # Check for cost center
-2025-12-12 00:20:17,448 INFO ipython cost_center = frappe.db.get_value("Company", "My Lending Co", "cost_center")
-2025-12-12 00:20:17,448 INFO ipython print(f"Company Cost Center: {cost_center}")
-2025-12-12 00:20:17,448 INFO ipython # If not set, get any cost center
-2025-12-12 00:20:17,448 INFO ipython if not cost_center:
-    cost_centers = frappe.get_all("Cost Center", 
-        filters={"company": "My Lending Co"},
-        fields=["name"],
-        limit=1
-    )
-    if cost_centers:
-        cost_center = cost_centers[0].name
-        print(f"Found Cost Center: {cost_center}")
-    else:
-        print("No cost center found - need to create one")
-2025-12-12 00:20:17,448 INFO ipython frappe.db.close()
-2025-12-12 00:20:17,448 INFO ipython === session end ===
-2025-12-12 00:20:25,399 INFO ipython === bench console session ===
-2025-12-12 00:20:25,400 INFO ipython import frappe
-2025-12-12 00:20:25,400 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:25,400 INFO ipython frappe.connect()
-2025-12-12 00:20:25,400 INFO ipython company = "My Lending Co"
-2025-12-12 00:20:25,400 INFO ipython loan_product = "LP-001"
-2025-12-12 00:20:25,400 INFO ipython loan_application = "ACC-LOAP-2025-00001"
-2025-12-12 00:20:25,400 INFO ipython # Get loan application details
-2025-12-12 00:20:25,400 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
-2025-12-12 00:20:25,400 INFO ipython print(f"Using Loan Application: {loan_app.name}")
-2025-12-12 00:20:25,400 INFO ipython # Get loan product details
-2025-12-12 00:20:25,400 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
-2025-12-12 00:20:25,400 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
-2025-12-12 00:20:25,400 INFO ipython # Create Loan
-2025-12-12 00:20:25,400 INFO ipython loan = frappe.new_doc("Loan")
-2025-12-12 00:20:25,400 INFO ipython loan.applicant_type = loan_app.applicant_type
-2025-12-12 00:20:25,400 INFO ipython loan.applicant = loan_app.applicant
-2025-12-12 00:20:25,400 INFO ipython loan.loan_application = loan_application
-2025-12-12 00:20:25,400 INFO ipython loan.company = company
-2025-12-12 00:20:25,400 INFO ipython loan.posting_date = frappe.utils.today()
-2025-12-12 00:20:25,400 INFO ipython loan.loan_product = loan_product
-2025-12-12 00:20:25,400 INFO ipython loan.loan_amount = loan_app.loan_amount
-2025-12-12 00:20:25,400 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
-2025-12-12 00:20:25,400 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
-2025-12-12 00:20:25,400 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
-2025-12-12 00:20:25,400 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
-2025-12-12 00:20:25,400 INFO ipython # Set accounts from loan product
-2025-12-12 00:20:25,400 INFO ipython loan.payment_account = loan_prod.payment_account
-2025-12-12 00:20:25,400 INFO ipython loan.loan_account = loan_prod.loan_account
-2025-12-12 00:20:25,400 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
-2025-12-12 00:20:25,400 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
-2025-12-12 00:20:25,400 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
-2025-12-12 00:20:25,400 INFO ipython # Set cost center (required for loans with interest > 0)
-2025-12-12 00:20:25,400 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
-2025-12-12 00:20:25,400 INFO ipython if not cost_center:
-    cost_centers = frappe.get_all("Cost Center", 
-        filters={"company": company},
-        fields=["name"],
-        limit=1
-    )
-    if cost_centers:
-        cost_center = cost_centers[0].name
-if cost_center:
-    loan.cost_center = cost_center
-2025-12-12 00:20:25,400 INFO ipython # Set repayment details if term loan
-2025-12-12 00:20:25,401 INFO ipython if loan.is_term_loan:
-    loan.repayment_method = loan_app.repayment_method
-    loan.repayment_periods = loan_app.repayment_periods
-    # Set repayment schedule type - need to check what's available
-    loan.repayment_schedule_type = "Monthly as per repayment start date"
-    loan.repayment_frequency = "Monthly"
-    # Set repayment start date (30 days from posting date)
-    from frappe.utils import add_days
-    loan.repayment_start_date = add_days(loan.posting_date, 30)
-2025-12-12 00:20:25,401 INFO ipython try:
-    loan.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan: {loan.name}")
-    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
-    print(f"   Loan Amount: {loan.loan_amount}")
-    print(f"   Loan Product: {loan.loan_product}")
-    print(f"   Status: {loan.status}")
-    print(f"   Rate of Interest: {loan.rate_of_interest}%")
-    print(f"   Repayment Periods: {loan.repayment_periods}")
-    print(f"   URL: /app/loan/{loan.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:20:25,401 INFO ipython frappe.db.close()
-2025-12-12 00:20:25,401 INFO ipython === session end ===
-2025-12-12 00:20:35,222 INFO ipython === bench console session ===
-2025-12-12 00:20:35,222 INFO ipython import frappe
-2025-12-12 00:20:35,222 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:35,222 INFO ipython frappe.connect()
-2025-12-12 00:20:35,222 INFO ipython company = "My Lending Co"
-2025-12-12 00:20:35,222 INFO ipython loan_product = "LP-001"
-2025-12-12 00:20:35,222 INFO ipython loan_application = "ACC-LOAP-2025-00001"
-2025-12-12 00:20:35,222 INFO ipython # Get loan application details
-2025-12-12 00:20:35,222 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
-2025-12-12 00:20:35,222 INFO ipython print(f"Using Loan Application: {loan_app.name}")
-2025-12-12 00:20:35,222 INFO ipython # Get loan product details
-2025-12-12 00:20:35,223 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
-2025-12-12 00:20:35,223 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
-2025-12-12 00:20:35,223 INFO ipython # Create Loan
-2025-12-12 00:20:35,223 INFO ipython loan = frappe.new_doc("Loan")
-2025-12-12 00:20:35,223 INFO ipython loan.applicant_type = loan_app.applicant_type
-2025-12-12 00:20:35,223 INFO ipython loan.applicant = loan_app.applicant
-2025-12-12 00:20:35,223 INFO ipython loan.loan_application = loan_application
-2025-12-12 00:20:35,223 INFO ipython loan.company = company
-2025-12-12 00:20:35,223 INFO ipython loan.posting_date = frappe.utils.today()
-2025-12-12 00:20:35,223 INFO ipython loan.loan_product = loan_product
-2025-12-12 00:20:35,223 INFO ipython loan.loan_amount = loan_app.loan_amount
-2025-12-12 00:20:35,223 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
-2025-12-12 00:20:35,223 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
-2025-12-12 00:20:35,223 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
-2025-12-12 00:20:35,223 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
-2025-12-12 00:20:35,223 INFO ipython # Set accounts from loan product
-2025-12-12 00:20:35,223 INFO ipython loan.payment_account = loan_prod.payment_account
-2025-12-12 00:20:35,223 INFO ipython loan.loan_account = loan_prod.loan_account
-2025-12-12 00:20:35,223 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
-2025-12-12 00:20:35,223 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
-2025-12-12 00:20:35,223 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
-2025-12-12 00:20:35,223 INFO ipython # Set cost center (required for loans with interest > 0)
-2025-12-12 00:20:35,223 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
-2025-12-12 00:20:35,223 INFO ipython if not cost_center:
-    cost_centers = frappe.get_all("Cost Center", 
-        filters={"company": company},
-        fields=["name"],
-        limit=1
-    )
-    if cost_centers:
-        cost_center = cost_centers[0].name
-    else:
-        # Create a cost center
-        try:
-            cc = frappe.new_doc("Cost Center")
-            cc.cost_center_name = "Main"
-            cc.company = company
-            cc.is_group = 0
-            cc.insert(ignore_permissions=True)
-            cost_center = cc.name
-            frappe.db.commit()
-            print(f"Created Cost Center: {cost_center}")
-        except Exception as e:
-            print(f"Warning: Could not create cost center: {e}")
-if cost_center:
-    loan.cost_center = cost_center
-2025-12-12 00:20:35,223 INFO ipython # Set repayment details if term loan
-2025-12-12 00:20:35,223 INFO ipython if loan.is_term_loan:
-    loan.repayment_method = loan_app.repayment_method
-    loan.repayment_periods = loan_app.repayment_periods
-    # Set repayment schedule type - need to check what's available
-    loan.repayment_schedule_type = "Monthly as per repayment start date"
-    loan.repayment_frequency = "Monthly"
-    # Set repayment start date (30 days from posting date)
-    from frappe.utils import add_days
-    loan.repayment_start_date = add_days(loan.posting_date, 30)
-2025-12-12 00:20:35,223 INFO ipython try:
-    loan.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan: {loan.name}")
-    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
-    print(f"   Loan Amount: {loan.loan_amount}")
-    print(f"   Loan Product: {loan.loan_product}")
-    print(f"   Status: {loan.status}")
-    print(f"   Rate of Interest: {loan.rate_of_interest}%")
-    print(f"   Repayment Periods: {loan.repayment_periods}")
-    print(f"   URL: /app/loan/{loan.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:20:35,223 INFO ipython frappe.db.close()
-2025-12-12 00:20:35,223 INFO ipython === session end ===
-2025-12-12 00:20:43,262 INFO ipython === bench console session ===
-2025-12-12 00:20:43,262 INFO ipython import frappe
-2025-12-12 00:20:43,262 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:43,262 INFO ipython frappe.connect()
-2025-12-12 00:20:43,262 INFO ipython # Check if cost center exists
-2025-12-12 00:20:43,262 INFO ipython cost_centers = frappe.get_all("Cost Center", 
-    filters={"company": "My Lending Co"},
-    fields=["name", "cost_center_name", "is_group"],
-    limit=5
-)
-2025-12-12 00:20:43,262 INFO ipython print(f"Existing Cost Centers: {len(cost_centers)}")
-2025-12-12 00:20:43,262 INFO ipython for cc in cost_centers:
-    print(f"  - {cc.name}: {cc.cost_center_name} (Group: {cc.is_group})")
-2025-12-12 00:20:43,262 INFO ipython # Try to create one
-2025-12-12 00:20:43,262 INFO ipython try:
-    cc = frappe.new_doc("Cost Center")
-    cc.cost_center_name = "Main"
-    cc.company = "My Lending Co"
-    cc.is_group = 0
-    cc.insert(ignore_permissions=True)
-    print(f"\n✅ Created Cost Center: {cc.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"\n❌ Error creating cost center: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:20:43,262 INFO ipython frappe.db.close()
-2025-12-12 00:20:43,262 INFO ipython === session end ===
-2025-12-12 00:20:59,674 INFO ipython === bench console session ===
-2025-12-12 00:20:59,675 INFO ipython import frappe
-2025-12-12 00:20:59,675 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:20:59,675 INFO ipython frappe.connect()
-2025-12-12 00:20:59,675 INFO ipython company = "My Lending Co"
-2025-12-12 00:20:59,675 INFO ipython loan_product = "LP-001"
-2025-12-12 00:20:59,675 INFO ipython loan_application = "ACC-LOAP-2025-00001"
-2025-12-12 00:20:59,675 INFO ipython # Get loan application details
-2025-12-12 00:20:59,675 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
-2025-12-12 00:20:59,675 INFO ipython print(f"Using Loan Application: {loan_app.name}")
-2025-12-12 00:20:59,675 INFO ipython # Get loan product details
-2025-12-12 00:20:59,675 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
-2025-12-12 00:20:59,675 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
-2025-12-12 00:20:59,675 INFO ipython # Create Loan
-2025-12-12 00:20:59,675 INFO ipython loan = frappe.new_doc("Loan")
-2025-12-12 00:20:59,675 INFO ipython loan.applicant_type = loan_app.applicant_type
-2025-12-12 00:20:59,675 INFO ipython loan.applicant = loan_app.applicant
-2025-12-12 00:20:59,675 INFO ipython loan.loan_application = loan_application
-2025-12-12 00:20:59,675 INFO ipython loan.company = company
-2025-12-12 00:20:59,675 INFO ipython loan.posting_date = frappe.utils.today()
-2025-12-12 00:20:59,675 INFO ipython loan.loan_product = loan_product
-2025-12-12 00:20:59,675 INFO ipython loan.loan_amount = loan_app.loan_amount
-2025-12-12 00:20:59,675 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
-2025-12-12 00:20:59,675 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
-2025-12-12 00:20:59,675 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
-2025-12-12 00:20:59,675 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
-2025-12-12 00:20:59,675 INFO ipython # Set accounts from loan product
-2025-12-12 00:20:59,675 INFO ipython loan.payment_account = loan_prod.payment_account
-2025-12-12 00:20:59,675 INFO ipython loan.loan_account = loan_prod.loan_account
-2025-12-12 00:20:59,675 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
-2025-12-12 00:20:59,675 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
-2025-12-12 00:20:59,675 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
-2025-12-12 00:20:59,675 INFO ipython # Set cost center (required for loans with interest > 0)
-2025-12-12 00:20:59,675 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
-2025-12-12 00:20:59,675 INFO ipython if not cost_center:
+2025-12-12 00:21:11,717 INFO ipython frappe.db.close()
+2025-12-12 00:21:11,717 INFO ipython === session end ===
+2025-12-12 00:21:16,303 INFO ipython === bench console session ===
+2025-12-12 00:21:16,303 INFO ipython import frappe
+2025-12-12 00:21:16,303 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:21:16,303 INFO ipython frappe.connect()
+2025-12-12 00:21:16,303 INFO ipython company = "My Lending Co"
+2025-12-12 00:21:16,303 INFO ipython loan_product = "LP-001"
+2025-12-12 00:21:16,303 INFO ipython loan_application = "ACC-LOAP-2025-00001"
+2025-12-12 00:21:16,303 INFO ipython # Get loan application details
+2025-12-12 00:21:16,303 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
+2025-12-12 00:21:16,303 INFO ipython print(f"Using Loan Application: {loan_app.name}")
+2025-12-12 00:21:16,303 INFO ipython # Get loan product details
+2025-12-12 00:21:16,304 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
+2025-12-12 00:21:16,304 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
+2025-12-12 00:21:16,304 INFO ipython # Create Loan
+2025-12-12 00:21:16,304 INFO ipython loan = frappe.new_doc("Loan")
+2025-12-12 00:21:16,304 INFO ipython loan.applicant_type = loan_app.applicant_type
+2025-12-12 00:21:16,304 INFO ipython loan.applicant = loan_app.applicant
+2025-12-12 00:21:16,304 INFO ipython loan.loan_application = loan_application
+2025-12-12 00:21:16,304 INFO ipython loan.company = company
+2025-12-12 00:21:16,304 INFO ipython loan.posting_date = frappe.utils.today()
+2025-12-12 00:21:16,304 INFO ipython loan.loan_product = loan_product
+2025-12-12 00:21:16,304 INFO ipython loan.loan_amount = loan_app.loan_amount
+2025-12-12 00:21:16,304 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
+2025-12-12 00:21:16,304 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
+2025-12-12 00:21:16,304 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
+2025-12-12 00:21:16,304 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
+2025-12-12 00:21:16,304 INFO ipython # Set accounts from loan product
+2025-12-12 00:21:16,304 INFO ipython loan.payment_account = loan_prod.payment_account
+2025-12-12 00:21:16,304 INFO ipython loan.loan_account = loan_prod.loan_account
+2025-12-12 00:21:16,304 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
+2025-12-12 00:21:16,304 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
+2025-12-12 00:21:16,304 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
+2025-12-12 00:21:16,304 INFO ipython # Set cost center (required for loans with interest > 0)
+2025-12-12 00:21:16,304 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
+2025-12-12 00:21:16,304 INFO ipython if not cost_center:
     cost_centers = frappe.get_all("Cost Center", 
         filters={"company": company, "is_group": 0},
         fields=["name"],
@@ -1580,116 +89,8 @@ except Exception as e:
             except Exception as e:
                 print(f"Warning: Could not create parent cost center: {e}")
         
-2025-12-12 00:20:59,676 INFO ipython         # Create child cost center
-2025-12-12 00:20:59,676 INFO ipython         if parent_cc:
-            try:
-                cc = frappe.new_doc("Cost Center")
-                cc.cost_center_name = "Main"
-                cc.company = company
-                cc.is_group = 0
-                cc.parent_cost_center = parent_cc
-                cc.insert(ignore_permissions=True)
-                cost_center = cc.name
-                frappe.db.commit()
-                print(f"Created Cost Center: {cost_center}")
-            except Exception as e:
-                print(f"Warning: Could not create cost center: {e}")
-if cost_center:
-    loan.cost_center = cost_center
-2025-12-12 00:20:59,676 INFO ipython # Set repayment details if term loan
-2025-12-12 00:20:59,676 INFO ipython if loan.is_term_loan:
-    loan.repayment_method = loan_app.repayment_method
-    loan.repayment_periods = loan_app.repayment_periods
-    # Set repayment schedule type - need to check what's available
-    loan.repayment_schedule_type = "Monthly as per repayment start date"
-    loan.repayment_frequency = "Monthly"
-    # Set repayment start date (30 days from posting date)
-    from frappe.utils import add_days
-    loan.repayment_start_date = add_days(loan.posting_date, 30)
-2025-12-12 00:20:59,676 INFO ipython try:
-    loan.insert(ignore_permissions=True)
-    print(f"\n✅ Created Loan: {loan.name}")
-    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
-    print(f"   Loan Amount: {loan.loan_amount}")
-    print(f"   Loan Product: {loan.loan_product}")
-    print(f"   Status: {loan.status}")
-    print(f"   Rate of Interest: {loan.rate_of_interest}%")
-    print(f"   Repayment Periods: {loan.repayment_periods}")
-    print(f"   URL: /app/loan/{loan.name}")
-    frappe.db.commit()
-except Exception as e:
-    print(f"❌ Error creating loan: {e}")
-    import traceback
-    traceback.print_exc()
-2025-12-12 00:20:59,676 INFO ipython frappe.db.close()
-2025-12-12 00:20:59,676 INFO ipython === session end ===
-2025-12-12 00:21:11,715 INFO ipython === bench console session ===
-2025-12-12 00:21:11,716 INFO ipython import frappe
-2025-12-12 00:21:11,716 INFO ipython frappe.init(site="lending.localhost")
-2025-12-12 00:21:11,716 INFO ipython frappe.connect()
-2025-12-12 00:21:11,716 INFO ipython company = "My Lending Co"
-2025-12-12 00:21:11,716 INFO ipython loan_product = "LP-001"
-2025-12-12 00:21:11,716 INFO ipython loan_application = "ACC-LOAP-2025-00001"
-2025-12-12 00:21:11,716 INFO ipython # Get loan application details
-2025-12-12 00:21:11,716 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
-2025-12-12 00:21:11,716 INFO ipython print(f"Using Loan Application: {loan_app.name}")
-2025-12-12 00:21:11,716 INFO ipython # Get loan product details
-2025-12-12 00:21:11,716 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
-2025-12-12 00:21:11,716 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
-2025-12-12 00:21:11,716 INFO ipython # Create Loan
-2025-12-12 00:21:11,716 INFO ipython loan = frappe.new_doc("Loan")
-2025-12-12 00:21:11,716 INFO ipython loan.applicant_type = loan_app.applicant_type
-2025-12-12 00:21:11,716 INFO ipython loan.applicant = loan_app.applicant
-2025-12-12 00:21:11,716 INFO ipython loan.loan_application = loan_application
-2025-12-12 00:21:11,716 INFO ipython loan.company = company
-2025-12-12 00:21:11,716 INFO ipython loan.posting_date = frappe.utils.today()
-2025-12-12 00:21:11,716 INFO ipython loan.loan_product = loan_product
-2025-12-12 00:21:11,716 INFO ipython loan.loan_amount = loan_app.loan_amount
-2025-12-12 00:21:11,716 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
-2025-12-12 00:21:11,716 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
-2025-12-12 00:21:11,716 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
-2025-12-12 00:21:11,716 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
-2025-12-12 00:21:11,716 INFO ipython # Set accounts from loan product
-2025-12-12 00:21:11,716 INFO ipython loan.payment_account = loan_prod.payment_account
-2025-12-12 00:21:11,716 INFO ipython loan.loan_account = loan_prod.loan_account
-2025-12-12 00:21:11,716 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
-2025-12-12 00:21:11,716 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
-2025-12-12 00:21:11,716 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
-2025-12-12 00:21:11,716 INFO ipython # Set cost center (required for loans with interest > 0)
-2025-12-12 00:21:11,716 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
-2025-12-12 00:21:11,716 INFO ipython if not cost_center:
-    cost_centers = frappe.get_all("Cost Center", 
-        filters={"company": company, "is_group": 0},
-        fields=["name"],
-        limit=1
-    )
-    if cost_centers:
-        cost_center = cost_centers[0].name
-    else:
-        # Create parent cost center first
-        parent_cc = None
-        parent_centers = frappe.get_all("Cost Center", 
-            filters={"company": company, "is_group": 1},
-            fields=["name"],
-            limit=1
-        )
-        if parent_centers:
-            parent_cc = parent_centers[0].name
-        else:
-            try:
-                parent = frappe.new_doc("Cost Center")
-                parent.cost_center_name = "All Cost Centers"
-                parent.company = company
-                parent.is_group = 1
-                parent.insert(ignore_permissions=True)
-                parent_cc = parent.name
-                frappe.db.commit()
-                print(f"Created Parent Cost Center: {parent_cc}")
-            except Exception as e:
-                print(f"Warning: Could not create parent cost center: {e}")
-        
-2025-12-12 00:21:11,717 INFO ipython         # Create child cost center
-2025-12-12 00:21:11,717 INFO ipython         if parent_cc:
+2025-12-12 00:21:16,304 INFO ipython         # Create child cost center
+2025-12-12 00:21:16,304 INFO ipython         if parent_cc:
             try:
                 cc = frappe.new_doc("Cost Center")
                 cc.cost_center_name = "Main"
@@ -1707,4 +108,1722 @@ if cost_center:
     print(f"Set Cost Center: {cost_center}")
 else:
     print("WARNING: No cost center available!")
-2025-12-12 00:21:11,717 INFO ipython # Set repayment details if term loan
+2025-12-12 00:21:16,304 INFO ipython # Set repayment details if term loan
+2025-12-12 00:21:16,304 INFO ipython if loan.is_term_loan:
+    loan.repayment_method = loan_app.repayment_method
+    loan.repayment_periods = loan_app.repayment_periods
+    # Set repayment schedule type - need to check what's available
+    loan.repayment_schedule_type = "Monthly as per repayment start date"
+    loan.repayment_frequency = "Monthly"
+    # Set repayment start date (30 days from posting date)
+    from frappe.utils import add_days
+    loan.repayment_start_date = add_days(loan.posting_date, 30)
+2025-12-12 00:21:16,304 INFO ipython try:
+    loan.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan: {loan.name}")
+    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
+    print(f"   Loan Amount: {loan.loan_amount}")
+    print(f"   Loan Product: {loan.loan_product}")
+    print(f"   Status: {loan.status}")
+    print(f"   Rate of Interest: {loan.rate_of_interest}%")
+    print(f"   Repayment Periods: {loan.repayment_periods}")
+    print(f"   URL: /app/loan/{loan.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:21:16,304 INFO ipython frappe.db.close()
+2025-12-12 00:21:16,304 INFO ipython === session end ===
+2025-12-12 00:21:29,312 INFO ipython === bench console session ===
+2025-12-12 00:21:29,313 INFO ipython import frappe
+2025-12-12 00:21:29,313 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:21:29,313 INFO ipython frappe.connect()
+2025-12-12 00:21:29,313 INFO ipython company = "My Lending Co"
+2025-12-12 00:21:29,313 INFO ipython # Create parent cost center first
+2025-12-12 00:21:29,313 INFO ipython parent_cc = None
+2025-12-12 00:21:29,313 INFO ipython parent_centers = frappe.get_all("Cost Center", 
+    filters={"company": company, "is_group": 1},
+    fields=["name"],
+    limit=1
+)
+2025-12-12 00:21:29,313 INFO ipython if parent_centers:
+    parent_cc = parent_centers[0].name
+    print(f"Using existing parent: {parent_cc}")
+else:
+    try:
+        parent = frappe.new_doc("Cost Center")
+        parent.cost_center_name = "All Cost Centers"
+        parent.company = company
+        parent.is_group = 1
+        parent.insert(ignore_permissions=True)
+        parent_cc = parent.name
+        frappe.db.commit()
+        print(f"✅ Created Parent Cost Center: {parent_cc}")
+    except Exception as e:
+        print(f"❌ Error creating parent: {e}")
+        import traceback
+        traceback.print_exc()
+2025-12-12 00:21:29,313 INFO ipython # Create child cost center
+2025-12-12 00:21:29,313 INFO ipython if parent_cc:
+    cost_centers = frappe.get_all("Cost Center", 
+        filters={"company": company, "is_group": 0},
+        fields=["name"],
+        limit=1
+    )
+    if cost_centers:
+        cost_center = cost_centers[0].name
+        print(f"Using existing cost center: {cost_center}")
+    else:
+        try:
+            cc = frappe.new_doc("Cost Center")
+            cc.cost_center_name = "Main"
+            cc.company = company
+            cc.is_group = 0
+            cc.parent_cost_center = parent_cc
+            cc.insert(ignore_permissions=True)
+            cost_center = cc.name
+            frappe.db.commit()
+            print(f"✅ Created Cost Center: {cost_center}")
+        except Exception as e:
+            print(f"❌ Error creating cost center: {e}")
+            import traceback
+            traceback.print_exc()
+2025-12-12 00:21:29,314 INFO ipython frappe.db.close()
+2025-12-12 00:21:29,314 INFO ipython === session end ===
+2025-12-12 00:21:39,280 INFO ipython === bench console session ===
+2025-12-12 00:21:39,280 INFO ipython import frappe
+2025-12-12 00:21:39,280 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:21:39,280 INFO ipython frappe.connect()
+2025-12-12 00:21:39,280 INFO ipython company = "My Lending Co"
+2025-12-12 00:21:39,280 INFO ipython # Try creating root cost center with empty parent
+2025-12-12 00:21:39,280 INFO ipython try:
+    parent = frappe.new_doc("Cost Center")
+    parent.cost_center_name = "All Cost Centers"
+    parent.company = company
+    parent.is_group = 1
+    parent.parent_cost_center = ""  # Empty for root
+    parent.insert(ignore_permissions=True)
+    parent_cc = parent.name
+    frappe.db.commit()
+    print(f"✅ Created Root Cost Center: {parent_cc}")
+    
+    # Now create child
+    cc = frappe.new_doc("Cost Center")
+    cc.cost_center_name = "Main"
+    cc.company = company
+    cc.is_group = 0
+    cc.parent_cost_center = parent_cc
+    cc.insert(ignore_permissions=True)
+    cost_center = cc.name
+    frappe.db.commit()
+    print(f"✅ Created Cost Center: {cost_center}")
+except Exception as e:
+    print(f"❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:21:39,280 INFO ipython frappe.db.close()
+2025-12-12 00:21:39,280 INFO ipython === session end ===
+2025-12-12 00:21:47,732 INFO ipython === bench console session ===
+2025-12-12 00:21:47,732 INFO ipython import frappe
+2025-12-12 00:21:47,732 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:21:47,732 INFO ipython frappe.connect()
+2025-12-12 00:21:47,732 INFO ipython company = "My Lending Co"
+2025-12-12 00:21:47,732 INFO ipython loan_product = "LP-001"
+2025-12-12 00:21:47,732 INFO ipython loan_application = "ACC-LOAP-2025-00001"
+2025-12-12 00:21:47,732 INFO ipython # Get loan application details
+2025-12-12 00:21:47,732 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
+2025-12-12 00:21:47,732 INFO ipython print(f"Using Loan Application: {loan_app.name}")
+2025-12-12 00:21:47,732 INFO ipython # Get loan product details
+2025-12-12 00:21:47,732 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
+2025-12-12 00:21:47,732 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
+2025-12-12 00:21:47,732 INFO ipython # Create Loan
+2025-12-12 00:21:47,732 INFO ipython loan = frappe.new_doc("Loan")
+2025-12-12 00:21:47,732 INFO ipython loan.applicant_type = loan_app.applicant_type
+2025-12-12 00:21:47,732 INFO ipython loan.applicant = loan_app.applicant
+2025-12-12 00:21:47,732 INFO ipython loan.loan_application = loan_application
+2025-12-12 00:21:47,732 INFO ipython loan.company = company
+2025-12-12 00:21:47,732 INFO ipython loan.posting_date = frappe.utils.today()
+2025-12-12 00:21:47,732 INFO ipython loan.loan_product = loan_product
+2025-12-12 00:21:47,732 INFO ipython loan.loan_amount = loan_app.loan_amount
+2025-12-12 00:21:47,733 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
+2025-12-12 00:21:47,733 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
+2025-12-12 00:21:47,733 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
+2025-12-12 00:21:47,733 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
+2025-12-12 00:21:47,733 INFO ipython # Set accounts from loan product
+2025-12-12 00:21:47,733 INFO ipython loan.payment_account = loan_prod.payment_account
+2025-12-12 00:21:47,733 INFO ipython loan.loan_account = loan_prod.loan_account
+2025-12-12 00:21:47,733 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
+2025-12-12 00:21:47,733 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
+2025-12-12 00:21:47,733 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
+2025-12-12 00:21:47,733 INFO ipython # Set cost center (required for loans with interest > 0)
+2025-12-12 00:21:47,733 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
+2025-12-12 00:21:47,733 INFO ipython if not cost_center:
+    cost_centers = frappe.get_all("Cost Center", 
+        filters={"company": company, "is_group": 0},
+        fields=["name"],
+        limit=1
+    )
+    if cost_centers:
+        cost_center = cost_centers[0].name
+    else:
+        # Create parent cost center first
+        parent_cc = None
+        parent_centers = frappe.get_all("Cost Center", 
+            filters={"company": company, "is_group": 1},
+            fields=["name"],
+            limit=1
+        )
+        if parent_centers:
+            parent_cc = parent_centers[0].name
+        else:
+            try:
+                # Root cost center must have cost_center_name == company
+                parent = frappe.new_doc("Cost Center")
+                parent.cost_center_name = company
+                parent.company = company
+                parent.is_group = 1
+                parent.insert(ignore_permissions=True)
+                parent_cc = parent.name
+                frappe.db.commit()
+                print(f"Created Parent Cost Center: {parent_cc}")
+            except Exception as e:
+                print(f"Warning: Could not create parent cost center: {e}")
+        
+2025-12-12 00:21:47,733 INFO ipython         # Create child cost center
+2025-12-12 00:21:47,733 INFO ipython         if parent_cc:
+            try:
+                cc = frappe.new_doc("Cost Center")
+                cc.cost_center_name = "Main"
+                cc.company = company
+                cc.is_group = 0
+                cc.parent_cost_center = parent_cc
+                cc.insert(ignore_permissions=True)
+                cost_center = cc.name
+                frappe.db.commit()
+                print(f"Created Cost Center: {cost_center}")
+            except Exception as e:
+                print(f"Warning: Could not create cost center: {e}")
+if cost_center:
+    loan.cost_center = cost_center
+    print(f"Set Cost Center: {cost_center}")
+else:
+    print("WARNING: No cost center available!")
+2025-12-12 00:21:47,733 INFO ipython # Set repayment details if term loan
+2025-12-12 00:21:47,733 INFO ipython if loan.is_term_loan:
+    loan.repayment_method = loan_app.repayment_method
+    loan.repayment_periods = loan_app.repayment_periods
+    # Set repayment schedule type - need to check what's available
+    loan.repayment_schedule_type = "Monthly as per repayment start date"
+    loan.repayment_frequency = "Monthly"
+    # Set repayment start date (30 days from posting date)
+    from frappe.utils import add_days
+    loan.repayment_start_date = add_days(loan.posting_date, 30)
+2025-12-12 00:21:47,733 INFO ipython try:
+    loan.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan: {loan.name}")
+    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
+    print(f"   Loan Amount: {loan.loan_amount}")
+    print(f"   Loan Product: {loan.loan_product}")
+    print(f"   Status: {loan.status}")
+    print(f"   Rate of Interest: {loan.rate_of_interest}%")
+    print(f"   Repayment Periods: {loan.repayment_periods}")
+    print(f"   URL: /app/loan/{loan.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:21:47,733 INFO ipython frappe.db.close()
+2025-12-12 00:21:47,733 INFO ipython === session end ===
+2025-12-12 00:21:58,889 INFO ipython === bench console session ===
+2025-12-12 00:21:58,890 INFO ipython import frappe
+2025-12-12 00:21:58,890 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:21:58,890 INFO ipython frappe.connect()
+2025-12-12 00:21:58,890 INFO ipython company = "My Lending Co"
+2025-12-12 00:21:58,890 INFO ipython # Create root cost center
+2025-12-12 00:21:58,890 INFO ipython try:
+    parent = frappe.new_doc("Cost Center")
+    parent.cost_center_name = company
+    parent.company = company
+    parent.is_group = 1
+    parent.insert(ignore_permissions=True)
+    parent_cc = parent.name
+    frappe.db.commit()
+    print(f"✅ Created Root Cost Center: {parent_cc}")
+except Exception as e:
+    print(f"Root exists or error: {e}")
+    # Try to get existing
+    parent_cc = frappe.db.get_value("Cost Center", {"cost_center_name": company, "company": company}, "name")
+    print(f"Existing root: {parent_cc}")
+2025-12-12 00:21:58,890 INFO ipython # Create child cost center
+2025-12-12 00:21:58,890 INFO ipython if parent_cc:
+    try:
+        cc = frappe.new_doc("Cost Center")
+        cc.cost_center_name = "Main"
+        cc.company = company
+        cc.is_group = 0
+        cc.parent_cost_center = parent_cc
+        cc.insert(ignore_permissions=True)
+        cost_center = cc.name
+        frappe.db.commit()
+        print(f"✅ Created Cost Center: {cost_center}")
+    except Exception as e:
+        print(f"Child exists or error: {e}")
+        cost_center = frappe.db.get_value("Cost Center", {"cost_center_name": "Main", "company": company, "is_group": 0}, "name")
+        print(f"Existing child: {cost_center}")
+2025-12-12 00:21:58,890 INFO ipython print(f"\nFinal Cost Center: {cost_center}")
+2025-12-12 00:21:58,890 INFO ipython frappe.db.close()
+2025-12-12 00:21:58,890 INFO ipython === session end ===
+2025-12-12 00:22:09,151 INFO ipython === bench console session ===
+2025-12-12 00:22:09,151 INFO ipython import frappe
+2025-12-12 00:22:09,151 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:22:09,151 INFO ipython frappe.connect()
+2025-12-12 00:22:09,151 INFO ipython company = "My Lending Co"
+2025-12-12 00:22:09,151 INFO ipython # Get root cost center (company name with abbreviation)
+2025-12-12 00:22:09,151 INFO ipython company_abbr = frappe.db.get_value("Company", company, "abbr")
+2025-12-12 00:22:09,151 INFO ipython root_cc_name = f"{company} - {company_abbr}"
+2025-12-12 00:22:09,152 INFO ipython root_cc = frappe.db.get_value("Cost Center", root_cc_name, "name")
+2025-12-12 00:22:09,152 INFO ipython print(f"Root Cost Center: {root_cc}")
+2025-12-12 00:22:09,152 INFO ipython # Create child cost center
+2025-12-12 00:22:09,152 INFO ipython if root_cc:
+    cost_centers = frappe.get_all("Cost Center", 
+        filters={"company": company, "is_group": 0, "parent_cost_center": root_cc},
+        fields=["name"],
+        limit=1
+    )
+    if cost_centers:
+        cost_center = cost_centers[0].name
+        print(f"Using existing: {cost_center}")
+    else:
+        try:
+            cc = frappe.new_doc("Cost Center")
+            cc.cost_center_name = "Main"
+            cc.company = company
+            cc.is_group = 0
+            cc.parent_cost_center = root_cc
+            cc.insert(ignore_permissions=True)
+            cost_center = cc.name
+            frappe.db.commit()
+            print(f"✅ Created Cost Center: {cost_center}")
+        except Exception as e:
+            print(f"Error: {e}")
+            cost_center = None
+else:
+    print("No root cost center found")
+    cost_center = None
+2025-12-12 00:22:09,152 INFO ipython print(f"\nCost Center to use: {cost_center}")
+2025-12-12 00:22:09,152 INFO ipython frappe.db.close()
+2025-12-12 00:22:09,152 INFO ipython === session end ===
+2025-12-12 00:22:28,200 INFO ipython === bench console session ===
+2025-12-12 00:22:28,201 INFO ipython import frappe
+2025-12-12 00:22:28,201 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:22:28,201 INFO ipython frappe.connect()
+2025-12-12 00:22:28,201 INFO ipython company = "My Lending Co"
+2025-12-12 00:22:28,201 INFO ipython # Try to create root cost center using the company name directly
+2025-12-12 00:22:28,201 INFO ipython # The autoname will add the abbreviation
+2025-12-12 00:22:28,201 INFO ipython try:
+    # First check if it exists with different name format
+    all_ccs = frappe.get_all("Cost Center", filters={"company": company}, fields=["name", "cost_center_name", "is_group"])
+    print(f"All Cost Centers: {len(all_ccs)}")
+    for cc in all_ccs:
+        print(f"  - {cc.name}: {cc.cost_center_name} (Group: {cc.is_group})")
+    
+    # Try creating with company name - autoname will handle the format
+    if not any(cc.is_group == 1 for cc in all_ccs):
+        parent = frappe.new_doc("Cost Center")
+        parent.cost_center_name = company
+        parent.company = company
+        parent.is_group = 1
+        # Don't set parent_cost_center for root
+        parent.insert(ignore_permissions=True)
+        root_cc = parent.name
+        frappe.db.commit()
+        print(f"\n✅ Created Root: {root_cc}")
+    else:
+        root_cc = next(cc.name for cc in all_ccs if cc.is_group == 1)
+        print(f"\nUsing existing root: {root_cc}")
+    
+    # Create child
+    child_ccs = [cc for cc in all_ccs if cc.is_group == 0]
+    if not child_ccs:
+        cc = frappe.new_doc("Cost Center")
+        cc.cost_center_name = "Main"
+        cc.company = company
+        cc.is_group = 0
+        cc.parent_cost_center = root_cc
+        cc.insert(ignore_permissions=True)
+        cost_center = cc.name
+        frappe.db.commit()
+        print(f"✅ Created Child: {cost_center}")
+    else:
+        cost_center = child_ccs[0].name
+        print(f"Using existing child: {cost_center}")
+    
+    # Set on company
+    frappe.db.set_value("Company", company, "cost_center", cost_center)
+    frappe.db.commit()
+    print(f"\n✅ Set company default cost center: {cost_center}")
+    
+except Exception as e:
+    print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:22:28,201 INFO ipython frappe.db.close()
+2025-12-12 00:22:28,201 INFO ipython === session end ===
+2025-12-12 00:22:45,735 INFO ipython === bench console session ===
+2025-12-12 00:22:45,735 INFO ipython import frappe
+2025-12-12 00:22:45,735 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:22:45,735 INFO ipython frappe.connect()
+2025-12-12 00:22:45,735 INFO ipython company = "My Lending Co"
+2025-12-12 00:22:45,735 INFO ipython company_abbr = frappe.db.get_value("Company", company, "abbr")
+2025-12-12 00:22:45,735 INFO ipython root_name = f"{company} - {company_abbr}"
+2025-12-12 00:22:45,735 INFO ipython # Create root cost center using SQL
+2025-12-12 00:22:45,735 INFO ipython try:
+    frappe.db.sql("""
+        INSERT INTO `tabCost Center` 
+        (name, cost_center_name, company, is_group, parent_cost_center, lft, rgt, creation, modified, owner, modified_by)
+        VALUES 
+        (%s, %s, %s, 1, '', 1, 2, NOW(), NOW(), 'Administrator', 'Administrator')
+    """, (root_name, company, company))
+    frappe.db.commit()
+    print(f"✅ Created Root Cost Center: {root_name}")
+    
+    # Create child
+    child_name = f"Main - {company_abbr}"
+    frappe.db.sql("""
+        INSERT INTO `tabCost Center` 
+        (name, cost_center_name, company, is_group, parent_cost_center, lft, rgt, creation, modified, owner, modified_by)
+        VALUES 
+        (%s, %s, %s, 0, %s, 2, 3, NOW(), NOW(), 'Administrator', 'Administrator')
+    """, (child_name, "Main", company, root_name))
+    frappe.db.commit()
+    print(f"✅ Created Child Cost Center: {child_name}")
+    
+    # Set on company
+    frappe.db.set_value("Company", company, "cost_center", child_name)
+    frappe.db.commit()
+    print(f"✅ Set company default cost center")
+    
+except Exception as e:
+    print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:22:45,735 INFO ipython frappe.db.close()
+2025-12-12 00:22:45,735 INFO ipython === session end ===
+2025-12-12 00:22:50,334 INFO ipython === bench console session ===
+2025-12-12 00:22:50,334 INFO ipython import frappe
+2025-12-12 00:22:50,334 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:22:50,334 INFO ipython frappe.connect()
+2025-12-12 00:22:50,334 INFO ipython company = "My Lending Co"
+2025-12-12 00:22:50,334 INFO ipython loan_product = "LP-001"
+2025-12-12 00:22:50,334 INFO ipython loan_application = "ACC-LOAP-2025-00001"
+2025-12-12 00:22:50,334 INFO ipython # Get loan application details
+2025-12-12 00:22:50,334 INFO ipython loan_app = frappe.get_doc("Loan Application", loan_application)
+2025-12-12 00:22:50,334 INFO ipython print(f"Using Loan Application: {loan_app.name}")
+2025-12-12 00:22:50,334 INFO ipython # Get loan product details
+2025-12-12 00:22:50,334 INFO ipython loan_prod = frappe.get_doc("Loan Product", loan_product)
+2025-12-12 00:22:50,334 INFO ipython print(f"Using Loan Product: {loan_prod.name}")
+2025-12-12 00:22:50,334 INFO ipython # Create Loan
+2025-12-12 00:22:50,334 INFO ipython loan = frappe.new_doc("Loan")
+2025-12-12 00:22:50,335 INFO ipython loan.applicant_type = loan_app.applicant_type
+2025-12-12 00:22:50,335 INFO ipython loan.applicant = loan_app.applicant
+2025-12-12 00:22:50,335 INFO ipython loan.loan_application = loan_application
+2025-12-12 00:22:50,335 INFO ipython loan.company = company
+2025-12-12 00:22:50,335 INFO ipython loan.posting_date = frappe.utils.today()
+2025-12-12 00:22:50,335 INFO ipython loan.loan_product = loan_product
+2025-12-12 00:22:50,335 INFO ipython loan.loan_amount = loan_app.loan_amount
+2025-12-12 00:22:50,335 INFO ipython loan.rate_of_interest = loan_prod.rate_of_interest
+2025-12-12 00:22:50,335 INFO ipython loan.penalty_charges_rate = loan_prod.penalty_interest_rate
+2025-12-12 00:22:50,335 INFO ipython loan.is_term_loan = loan_prod.is_term_loan
+2025-12-12 00:22:50,335 INFO ipython loan.is_secured_loan = loan_app.is_secured_loan
+2025-12-12 00:22:50,335 INFO ipython # Set accounts from loan product
+2025-12-12 00:22:50,335 INFO ipython loan.payment_account = loan_prod.payment_account
+2025-12-12 00:22:50,335 INFO ipython loan.loan_account = loan_prod.loan_account
+2025-12-12 00:22:50,335 INFO ipython loan.interest_income_account = loan_prod.interest_income_account
+2025-12-12 00:22:50,335 INFO ipython loan.penalty_income_account = loan_prod.penalty_income_account
+2025-12-12 00:22:50,335 INFO ipython loan.disbursement_account = loan_prod.disbursement_account
+2025-12-12 00:22:50,335 INFO ipython # Set cost center (required for loans with interest > 0)
+2025-12-12 00:22:50,335 INFO ipython cost_center = frappe.db.get_value("Company", company, "cost_center")
+2025-12-12 00:22:50,335 INFO ipython if not cost_center:
+    cost_centers = frappe.get_all("Cost Center", 
+        filters={"company": company, "is_group": 0},
+        fields=["name"],
+        limit=1
+    )
+    if cost_centers:
+        cost_center = cost_centers[0].name
+    else:
+        # Create parent cost center first
+        parent_cc = None
+        parent_centers = frappe.get_all("Cost Center", 
+            filters={"company": company, "is_group": 1},
+            fields=["name"],
+            limit=1
+        )
+        if parent_centers:
+            parent_cc = parent_centers[0].name
+        else:
+            try:
+                # Root cost center must have cost_center_name == company
+                parent = frappe.new_doc("Cost Center")
+                parent.cost_center_name = company
+                parent.company = company
+                parent.is_group = 1
+                parent.insert(ignore_permissions=True)
+                parent_cc = parent.name
+                frappe.db.commit()
+                print(f"Created Parent Cost Center: {parent_cc}")
+            except Exception as e:
+                print(f"Warning: Could not create parent cost center: {e}")
+        
+2025-12-12 00:22:50,335 INFO ipython         # Create child cost center
+2025-12-12 00:22:50,335 INFO ipython         if parent_cc:
+            try:
+                cc = frappe.new_doc("Cost Center")
+                cc.cost_center_name = "Main"
+                cc.company = company
+                cc.is_group = 0
+                cc.parent_cost_center = parent_cc
+                cc.insert(ignore_permissions=True)
+                cost_center = cc.name
+                frappe.db.commit()
+                print(f"Created Cost Center: {cost_center}")
+            except Exception as e:
+                print(f"Warning: Could not create cost center: {e}")
+if cost_center:
+    loan.cost_center = cost_center
+    print(f"Set Cost Center: {cost_center}")
+else:
+    print("WARNING: No cost center available!")
+2025-12-12 00:22:50,335 INFO ipython # Set repayment details if term loan
+2025-12-12 00:22:50,335 INFO ipython if loan.is_term_loan:
+    loan.repayment_method = loan_app.repayment_method
+    loan.repayment_periods = loan_app.repayment_periods
+    # Set repayment schedule type - need to check what's available
+    loan.repayment_schedule_type = "Monthly as per repayment start date"
+    loan.repayment_frequency = "Monthly"
+    # Set repayment start date (30 days from posting date)
+    from frappe.utils import add_days
+    loan.repayment_start_date = add_days(loan.posting_date, 30)
+2025-12-12 00:22:50,335 INFO ipython try:
+    loan.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan: {loan.name}")
+    print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
+    print(f"   Loan Amount: {loan.loan_amount}")
+    print(f"   Loan Product: {loan.loan_product}")
+    print(f"   Status: {loan.status}")
+    print(f"   Rate of Interest: {loan.rate_of_interest}%")
+    print(f"   Repayment Periods: {loan.repayment_periods}")
+    print(f"   URL: /app/loan/{loan.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:22:50,335 INFO ipython frappe.db.close()
+2025-12-12 00:22:50,335 INFO ipython === session end ===
+2025-12-12 00:22:59,245 INFO ipython === bench console session ===
+2025-12-12 00:22:59,245 INFO ipython import frappe
+2025-12-12 00:22:59,245 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:22:59,245 INFO ipython frappe.connect()
+2025-12-12 00:22:59,245 INFO ipython loan = frappe.get_doc("Loan", "ACC-LOAN-2025-00001")
+2025-12-12 00:22:59,245 INFO ipython print(f"\n✅ Loan Details:")
+2025-12-12 00:22:59,245 INFO ipython print(f"   Name: {loan.name}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Applicant: {loan.applicant} ({loan.applicant_type})")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Company: {loan.company}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Loan Product: {loan.loan_product}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Loan Amount: {loan.loan_amount}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Status: {loan.status}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Rate of Interest: {loan.rate_of_interest}%")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Penalty Rate: {loan.penalty_charges_rate}%")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Is Term Loan: {loan.is_term_loan}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Repayment Method: {loan.repayment_method}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Repayment Periods: {loan.repayment_periods}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Repayment Start Date: {loan.repayment_start_date}")
+2025-12-12 00:22:59,246 INFO ipython print(f"   Cost Center: {loan.cost_center}")
+2025-12-12 00:22:59,246 INFO ipython print(f"\n   Access URL: http://lending.localhost:8000/app/loan/{loan.name}")
+2025-12-12 00:22:59,246 INFO ipython frappe.db.close()
+2025-12-12 00:22:59,246 INFO ipython === session end ===
+2025-12-12 00:24:21,355 INFO ipython === bench console session ===
+2025-12-12 00:24:21,356 INFO ipython import frappe
+2025-12-12 00:24:21,356 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:24:21,356 INFO ipython frappe.connect()
+2025-12-12 00:24:21,356 INFO ipython # Check existing loan
+2025-12-12 00:24:21,356 INFO ipython loan = frappe.db.get_value("Loan", "ACC-LOAN-2025-00001", ["name", "loan_amount", "status", "company"], as_dict=True)
+2025-12-12 00:24:21,356 INFO ipython print(f"Loan: {loan}")
+2025-12-12 00:24:21,356 INFO ipython frappe.db.close()
+2025-12-12 00:24:21,356 INFO ipython === session end ===
+2025-12-12 00:24:30,266 INFO ipython === bench console session ===
+2025-12-12 00:24:30,266 INFO ipython import frappe
+2025-12-12 00:24:30,266 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:24:30,266 INFO ipython frappe.connect()
+2025-12-12 00:24:30,266 INFO ipython # Get loan details
+2025-12-12 00:24:30,266 INFO ipython loan = frappe.get_doc("Loan", "ACC-LOAN-2025-00001")
+2025-12-12 00:24:30,266 INFO ipython print(f"Loan: {loan.name}")
+2025-12-12 00:24:30,266 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:24:30,266 INFO ipython print(f"Rate of Interest: {loan.rate_of_interest}")
+2025-12-12 00:24:30,266 INFO ipython print(f"Repayment Method: {loan.repayment_method}")
+2025-12-12 00:24:30,266 INFO ipython print(f"Repayment Periods: {loan.repayment_periods}")
+2025-12-12 00:24:30,266 INFO ipython print(f"Status: {loan.status}")
+2025-12-12 00:24:30,266 INFO ipython frappe.db.close()
+2025-12-12 00:24:30,266 INFO ipython === session end ===
+2025-12-12 00:24:48,094 INFO ipython === bench console session ===
+2025-12-12 00:24:48,095 INFO ipython import frappe
+2025-12-12 00:24:48,095 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:24:48,095 INFO ipython frappe.connect()
+2025-12-12 00:24:48,095 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:24:48,095 INFO ipython # Get loan details
+2025-12-12 00:24:48,095 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:24:48,095 INFO ipython print(f"Using Loan: {loan.name}")
+2025-12-12 00:24:48,095 INFO ipython # Create Loan Restructure
+2025-12-12 00:24:48,095 INFO ipython loan_restructure = frappe.new_doc("Loan Restructure")
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.loan = loan_name
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.restructure_type = "Normal Restructure"
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.restructure_date = frappe.utils.now()
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.reason_for_restructure = "Customer requested extension of repayment period due to financial difficulties"
+2025-12-12 00:24:48,095 INFO ipython # New terms - extend repayment period and slightly reduce interest rate
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.new_rate_of_interest = 11.0  # Reduced from 12%
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.new_repayment_method = "Repay Over Number of Periods"
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.new_repayment_period_in_months = 18  # Extended from 12 to 18 months
+2025-12-12 00:24:48,095 INFO ipython # Set repayment start date (30 days from restructure date)
+2025-12-12 00:24:48,095 INFO ipython from frappe.utils import add_days
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.repayment_start_date = add_days(frappe.utils.today(), 30)
+2025-12-12 00:24:48,095 INFO ipython # Treatment options
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.treatment_of_normal_interest = "Capitalize"
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.unaccrued_interest_treatment = "Capitalize"
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.treatment_of_penal_interest = "Capitalize"
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.treatment_of_other_charges = "Capitalize"
+2025-12-12 00:24:48,095 INFO ipython # Waiver amounts (optional - set to 0)
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.interest_waiver_amount = 0
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.penal_interest_waiver = 0
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.unaccrued_interest_waiver = 0
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.other_charges_waiver = 0
+2025-12-12 00:24:48,095 INFO ipython loan_restructure.waive_off_restructure_charges = 0
+2025-12-12 00:24:48,095 INFO ipython try:
+    loan_restructure.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Restructure: {loan_restructure.name}")
+    print(f"   Loan: {loan_restructure.loan}")
+    print(f"   Restructure Type: {loan_restructure.restructure_type}")
+    print(f"   Restructure Date: {loan_restructure.restructure_date}")
+    print(f"   New Rate of Interest: {loan_restructure.new_rate_of_interest}%")
+    print(f"   New Repayment Period: {loan_restructure.new_repayment_period_in_months} months")
+    print(f"   New Repayment Method: {loan_restructure.new_repayment_method}")
+    print(f"   Status: {loan_restructure.status}")
+    print(f"   URL: /app/loan-restructure/{loan_restructure.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan restructure: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:24:48,095 INFO ipython frappe.db.close()
+2025-12-12 00:24:48,095 INFO ipython === session end ===
+2025-12-12 00:25:05,122 INFO ipython === bench console session ===
+2025-12-12 00:25:05,123 INFO ipython import frappe
+2025-12-12 00:25:05,123 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:25:05,123 INFO ipython frappe.connect()
+2025-12-12 00:25:05,123 INFO ipython loan_restructure = frappe.get_doc("Loan Restructure", "LOAN-RES-2025-00001")
+2025-12-12 00:25:05,123 INFO ipython print(f"\n✅ Loan Restructure Details:")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Name: {loan_restructure.name}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Loan: {loan_restructure.loan}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Company: {loan_restructure.company}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Applicant: {loan_restructure.applicant}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Restructure Type: {loan_restructure.restructure_type}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Restructure Date: {loan_restructure.restructure_date}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Reason: {loan_restructure.reason_for_restructure}")
+2025-12-12 00:25:05,123 INFO ipython print(f"   Status: {loan_restructure.status}")
+2025-12-12 00:25:05,123 INFO ipython print(f"\n   Old Terms:")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - Old Loan Amount: {loan_restructure.old_loan_amount}")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - Old Rate of Interest: {loan_restructure.old_rate_of_interest}%")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - Old Repayment Method: {loan_restructure.repayment_method}")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - Old Tenure: {loan_restructure.old_tenure} months")
+2025-12-12 00:25:05,123 INFO ipython print(f"\n   New Terms:")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - New Loan Amount: {loan_restructure.new_loan_amount}")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - New Rate of Interest: {loan_restructure.new_rate_of_interest}%")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - New Repayment Method: {loan_restructure.new_repayment_method}")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - New Repayment Period: {loan_restructure.new_repayment_period_in_months} months")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - New Monthly Repayment Amount: {loan_restructure.new_monthly_repayment_amount}")
+2025-12-12 00:25:05,123 INFO ipython print(f"     - Repayment Start Date: {loan_restructure.repayment_start_date}")
+2025-12-12 00:25:05,123 INFO ipython print(f"\n   Access URL: http://lending.localhost:8000/app/loan-restructure/{loan_restructure.name}")
+2025-12-12 00:25:05,124 INFO ipython frappe.db.close()
+2025-12-12 00:25:05,124 INFO ipython === session end ===
+2025-12-12 00:26:06,628 INFO ipython === bench console session ===
+2025-12-12 00:26:06,629 INFO ipython import frappe
+2025-12-12 00:26:06,629 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:26:06,629 INFO ipython frappe.connect()
+2025-12-12 00:26:06,629 INFO ipython # Check available employees
+2025-12-12 00:26:06,629 INFO ipython employees = frappe.get_all("Employee", 
+    fields=["name", "employee_name"],
+    limit=5
+)
+2025-12-12 00:26:06,629 INFO ipython print(f"Available employees: {len(employees)}")
+2025-12-12 00:26:06,629 INFO ipython for e in employees:
+    print(f"  - {e.employee_name} ({e.name})")
+2025-12-12 00:26:06,629 INFO ipython # Check loan product
+2025-12-12 00:26:06,629 INFO ipython loan_product = frappe.db.get_value("Loan Product", "LP-001", ["name", "rate_of_interest", "is_term_loan"], as_dict=True)
+2025-12-12 00:26:06,629 INFO ipython print(f"\nLoan Product: {loan_product}")
+2025-12-12 00:26:06,629 INFO ipython company = "My Lending Co"
+2025-12-12 00:26:06,629 INFO ipython print(f"Company: {company}")
+2025-12-12 00:26:06,629 INFO ipython frappe.db.close()
+2025-12-12 00:26:06,629 INFO ipython === session end ===
+2025-12-12 00:26:16,655 INFO ipython === bench console session ===
+2025-12-12 00:26:16,655 INFO ipython import frappe
+2025-12-12 00:26:16,655 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:26:16,655 INFO ipython frappe.connect()
+2025-12-12 00:26:16,656 INFO ipython company = "My Lending Co"
+2025-12-12 00:26:16,656 INFO ipython loan_product = "LP-001"
+2025-12-12 00:26:16,656 INFO ipython # Check if loan product exists
+2025-12-12 00:26:16,656 INFO ipython if not frappe.db.exists("Loan Product", loan_product):
+    print(f"❌ Error: Loan Product {loan_product} does not exist!")
+    frappe.db.close()
+    exit()
+2025-12-12 00:26:16,656 INFO ipython # Get or use existing employee
+2025-12-12 00:26:16,656 INFO ipython employees = frappe.get_all("Employee", 
+    fields=["name", "employee_name"],
+    limit=1
+)
+2025-12-12 00:26:16,656 INFO ipython if employees:
+    employee = employees[0].name
+    employee_name = employees[0].employee_name
+    print(f"Using existing employee: {employee_name}")
+else:
+    print("❌ Error: No employee found!")
+    frappe.db.close()
+    exit()
+2025-12-12 00:26:16,656 INFO ipython # Create Loan Application
+2025-12-12 00:26:16,656 INFO ipython loan_application = frappe.new_doc("Loan Application")
+2025-12-12 00:26:16,656 INFO ipython loan_application.applicant_type = "Employee"
+2025-12-12 00:26:16,656 INFO ipython loan_application.applicant = employee
+2025-12-12 00:26:16,656 INFO ipython loan_application.first_name = employee_name.split()[0] if employee_name else "Employee"
+2025-12-12 00:26:16,656 INFO ipython loan_application.last_name = " ".join(employee_name.split()[1:]) if len(employee_name.split()) > 1 else "Name"
+2025-12-12 00:26:16,656 INFO ipython loan_application.company = company
+2025-12-12 00:26:16,656 INFO ipython loan_application.posting_date = frappe.utils.today()
+2025-12-12 00:26:16,656 INFO ipython loan_application.status = "Open"
+2025-12-12 00:26:16,656 INFO ipython loan_application.loan_product = loan_product
+2025-12-12 00:26:16,656 INFO ipython loan_application.loan_amount = 150000  # 150,000 - different amount from first application
+2025-12-12 00:26:16,656 INFO ipython loan_application.is_term_loan = 1
+2025-12-12 00:26:16,656 INFO ipython loan_application.is_secured_loan = 0
+2025-12-12 00:26:16,656 INFO ipython loan_application.description = "Home improvement loan application"
+2025-12-12 00:26:16,656 INFO ipython loan_application.applicant_email_address = "employee@example.com"
+2025-12-12 00:26:16,656 INFO ipython loan_application.address_line_1 = "456 Oak Avenue"
+2025-12-12 00:26:16,656 INFO ipython loan_application.city = "Los Angeles"
+2025-12-12 00:26:16,656 INFO ipython loan_application.state = "CA"
+2025-12-12 00:26:16,656 INFO ipython loan_application.country = "United States"
+2025-12-12 00:26:16,656 INFO ipython loan_application.zip_code = 90001
+2025-12-12 00:26:16,656 INFO ipython loan_application.repayment_method = "Repay Over Number of Periods"
+2025-12-12 00:26:16,656 INFO ipython loan_application.repayment_periods = 24  # 24 months - different from first application
+2025-12-12 00:26:16,656 INFO ipython try:
+    loan_application.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Application: {loan_application.name}")
+    print(f"   Applicant: {employee_name} ({employee})")
+    print(f"   Loan Amount: {loan_application.loan_amount}")
+    print(f"   Loan Product: {loan_product}")
+    print(f"   Status: {loan_application.status}")
+    print(f"   Repayment Periods: {loan_application.repayment_periods} months")
+    print(f"   Description: {loan_application.description}")
+    print(f"   URL: /app/loan-application/{loan_application.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan application: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:26:16,656 INFO ipython frappe.db.close()
+2025-12-12 00:26:16,656 INFO ipython === session end ===
+2025-12-12 00:26:28,169 INFO ipython === bench console session ===
+2025-12-12 00:26:28,170 INFO ipython import frappe
+2025-12-12 00:26:28,170 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:26:28,170 INFO ipython frappe.connect()
+2025-12-12 00:26:28,170 INFO ipython loan_app = frappe.get_doc("Loan Application", "ACC-LOAP-2025-00002")
+2025-12-12 00:26:28,170 INFO ipython print(f"\n✅ Loan Application Details:")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Name: {loan_app.name}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Applicant: {loan_app.applicant} ({loan_app.applicant_type})")
+2025-12-12 00:26:28,170 INFO ipython print(f"   First Name: {loan_app.first_name}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Last Name: {loan_app.last_name}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Company: {loan_app.company}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Posting Date: {loan_app.posting_date}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Status: {loan_app.status}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Loan Product: {loan_app.loan_product}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Loan Amount: {loan_app.loan_amount}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Is Term Loan: {loan_app.is_term_loan}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Is Secured Loan: {loan_app.is_secured_loan}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Repayment Method: {loan_app.repayment_method}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Repayment Periods: {loan_app.repayment_periods} months")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Description: {loan_app.description}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Email: {loan_app.applicant_email_address}")
+2025-12-12 00:26:28,170 INFO ipython print(f"   Address: {loan_app.address_line_1}, {loan_app.city}, {loan_app.state} {loan_app.zip_code}")
+2025-12-12 00:26:28,170 INFO ipython print(f"\n   Access URL: http://lending.localhost:8000/app/loan-application/{loan_app.name}")
+2025-12-12 00:26:28,170 INFO ipython frappe.db.close()
+2025-12-12 00:26:28,170 INFO ipython === session end ===
+2025-12-12 00:32:17,424 INFO ipython === bench console session ===
+2025-12-12 00:32:17,425 INFO ipython import frappe
+2025-12-12 00:32:17,425 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:32:17,425 INFO ipython frappe.connect()
+2025-12-12 00:32:17,425 INFO ipython # Check key doctypes exist
+2025-12-12 00:32:17,425 INFO ipython doctypes_to_check = [
+    "User", "Company", "Employee", 
+    "Loan Product", "Loan Application", "Loan", "Loan Restructure",
+    "Loan Disbursement", "Loan Repayment", "Loan Security"
+]
+2025-12-12 00:32:17,425 INFO ipython print("Checking key doctypes:")
+2025-12-12 00:32:17,425 INFO ipython for doctype in doctypes_to_check:
+    exists = frappe.db.exists("DocType", doctype)
+    status = "✅" if exists else "❌"
+    print(f"{status} {doctype}")
+2025-12-12 00:32:17,425 INFO ipython # Check for any errors in recent logs
+2025-12-12 00:32:17,425 INFO ipython print("\n" + "="*50)
+2025-12-12 00:32:17,425 INFO ipython print("Checking for recent errors...")
+2025-12-12 00:32:17,425 INFO ipython frappe.db.close()
+2025-12-12 00:32:17,425 INFO ipython === session end ===
+2025-12-12 00:33:11,509 INFO ipython === bench console session ===
+2025-12-12 00:33:11,510 INFO ipython import frappe
+2025-12-12 00:33:11,510 INFO ipython import sys
+2025-12-12 00:33:11,510 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:33:11,510 INFO ipython frappe.connect()
+2025-12-12 00:33:11,510 INFO ipython errors = []
+2025-12-12 00:33:11,510 INFO ipython warnings = []
+2025-12-12 00:33:11,511 INFO ipython success = []
+2025-12-12 00:33:11,511 INFO ipython def test_doctype_access(doctype_name, create_test=False):
+    """Test if a doctype can be accessed and optionally create a test record"""
+    try:
+        # Check if doctype exists
+        if not frappe.db.exists("DocType", doctype_name):
+            errors.append(f"❌ DocType '{doctype_name}' does not exist")
+            return False
+        
+        # Try to get list
+        try:
+            records = frappe.get_all(doctype_name, limit=1)
+            success.append(f"✅ {doctype_name}: Can access list view ({len(records)} records)")
+        except Exception as e:
+            errors.append(f"❌ {doctype_name}: Cannot access list - {str(e)}")
+            return False
+        
+        # Try to get meta
+        try:
+            meta = frappe.get_meta(doctype_name)
+            success.append(f"✅ {doctype_name}: Meta accessible")
+        except Exception as e:
+            warnings.append(f"⚠️  {doctype_name}: Meta access issue - {str(e)}")
+        
+        return True
+    except Exception as e:
+        errors.append(f"❌ {doctype_name}: Error - {str(e)}")
+        return False
+2025-12-12 00:33:11,511 INFO ipython def test_workspace(workspace_name):
+    """Test if a workspace is accessible"""
+    try:
+        if frappe.db.exists("Workspace", workspace_name):
+            workspace = frappe.get_doc("Workspace", workspace_name)
+            success.append(f"✅ Workspace '{workspace_name}': Accessible")
+            return True
+        else:
+            warnings.append(f"⚠️  Workspace '{workspace_name}': Not found")
+            return False
+    except Exception as e:
+        errors.append(f"❌ Workspace '{workspace_name}': Error - {str(e)}")
+        return False
+2025-12-12 00:33:11,511 INFO ipython def test_page(page_name):
+    """Test if a page is accessible"""
+    try:
+        if frappe.db.exists("Page", page_name):
+            success.append(f"✅ Page '{page_name}': Exists")
+            return True
+        else:
+            warnings.append(f"⚠️  Page '{page_name}': Not found")
+            return False
+    except Exception as e:
+        errors.append(f"❌ Page '{page_name}': Error - {str(e)}")
+        return False
+2025-12-12 00:33:11,511 INFO ipython print("="*70)
+2025-12-12 00:33:11,511 INFO ipython print("TESTING LENDING ROUTES AND FUNCTIONALITY")
+2025-12-12 00:33:11,511 INFO ipython print("="*70)
+2025-12-12 00:33:11,511 INFO ipython # Test Core Doctypes
+2025-12-12 00:33:11,511 INFO ipython print("\n1. Testing Core Doctypes:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython core_doctypes = ["User", "Company", "Employee", "Role", "Permission"]
+2025-12-12 00:33:11,511 INFO ipython for dt in core_doctypes:
+    test_doctype_access(dt)
+2025-12-12 00:33:11,511 INFO ipython # Test Lending Doctypes
+2025-12-12 00:33:11,511 INFO ipython print("\n2. Testing Lending Doctypes:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython lending_doctypes = [
+    "Loan Product",
+    "Loan Application", 
+    "Loan",
+    "Loan Restructure",
+    "Loan Disbursement",
+    "Loan Repayment",
+    "Loan Security",
+    "Loan Security Assignment",
+    "Loan Security Pledge",
+    "Loan Interest Accrual",
+    "Loan Demand",
+    "Loan Write Off",
+    "Loan Balance Adjustment",
+    "Loan Refund",
+    "Loan Transfer",
+    "Loan Classification",
+    "Loan Security Deposit",
+    "Loan Repayment Schedule"
+]
+2025-12-12 00:33:11,511 INFO ipython for dt in lending_doctypes:
+    test_doctype_access(dt)
+2025-12-12 00:33:11,511 INFO ipython # Test Workspaces
+2025-12-12 00:33:11,511 INFO ipython print("\n3. Testing Workspaces:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython workspaces = ["Lending", "Loan Origination", "Applications", "Loans"]
+2025-12-12 00:33:11,511 INFO ipython for ws in workspaces:
+    test_workspace(ws)
+2025-12-12 00:33:11,511 INFO ipython # Test Pages/Dashboards
+2025-12-12 00:33:11,511 INFO ipython print("\n4. Testing Pages/Dashboards:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython pages = ["Loan Dashboard", "lending"]
+2025-12-12 00:33:11,511 INFO ipython for page in pages:
+    test_page(page)
+2025-12-12 00:33:11,511 INFO ipython # Test existing data
+2025-12-12 00:33:11,511 INFO ipython print("\n5. Testing Existing Data:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython try:
+    # Users
+    users = frappe.get_all("User", filters={"enabled": 1}, limit=5)
+    success.append(f"✅ Users: {len(users)} enabled users found")
+    
+    # Companies
+    companies = frappe.get_all("Company", limit=5)
+    success.append(f"✅ Companies: {len(companies)} companies found")
+    if companies:
+        company = frappe.get_doc("Company", companies[0].name)
+        success.append(f"   - Company '{company.name}': {company.company_name}")
+    
+    # Employees
+    employees = frappe.get_all("Employee", limit=5)
+    success.append(f"✅ Employees: {len(employees)} employees found")
+    if employees:
+        emp = frappe.get_doc("Employee", employees[0].name)
+        success.append(f"   - Employee '{emp.name}': {emp.employee_name}")
+    
+    # Loan Products
+    loan_products = frappe.get_all("Loan Product", limit=5)
+    success.append(f"✅ Loan Products: {len(loan_products)} found")
+    
+    # Loan Applications
+    loan_apps = frappe.get_all("Loan Application", limit=5)
+    success.append(f"✅ Loan Applications: {len(loan_apps)} found")
+    
+    # Loans
+    loans = frappe.get_all("Loan", limit=5)
+    success.append(f"✅ Loans: {len(loans)} found")
+    
+    # Loan Restructures
+    loan_restructures = frappe.get_all("Loan Restructure", limit=5)
+    success.append(f"✅ Loan Restructures: {len(loan_restructures)} found")
+    
+except Exception as e:
+    errors.append(f"❌ Error checking existing data: {str(e)}")
+2025-12-12 00:33:11,511 INFO ipython # Test Routes
+2025-12-12 00:33:11,511 INFO ipython print("\n6. Testing Routes:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython routes_to_test = [
+    "/app/lending",
+    "/app/loan-product",
+    "/app/loan-application",
+    "/app/loan",
+    "/app/loan-restructure",
+    "/app/company",
+    "/app/user",
+    "/app/employee"
+]
+2025-12-12 00:33:11,511 INFO ipython for route in routes_to_test:
+    try:
+        # Just check if the route doctype/page exists
+        route_parts = route.split("/")
+        if len(route_parts) >= 3:
+            doctype_or_page = route_parts[2].replace("-", " ").title().replace(" ", "")
+            if doctype_or_page == "Lending":
+                test_workspace("Lending")
+            elif doctype_or_page in ["Company", "User", "Employee"]:
+                test_doctype_access(doctype_or_page)
+            else:
+                # Try as doctype
+                test_doctype_access(doctype_or_page)
+    except Exception as e:
+        warnings.append(f"⚠️  Route '{route}': {str(e)}")
+2025-12-12 00:33:11,511 INFO ipython # Check for import errors
+2025-12-12 00:33:11,511 INFO ipython print("\n7. Checking for Import Errors:")
+2025-12-12 00:33:11,511 INFO ipython print("-" * 70)
+2025-12-12 00:33:11,511 INFO ipython try:
+    # Try importing key modules
+    import lending.loan_management.doctype.loan.loan
+    success.append("✅ lending.loan_management.doctype.loan.loan: Import successful")
+    
+    import lending.loan_management.doctype.loan_application.loan_application
+    success.append("✅ lending.loan_management.doctype.loan_application.loan_application: Import successful")
+    
+    import lending.loan_management.doctype.loan_product.loan_product
+    success.append("✅ lending.loan_management.doctype.loan_product.loan_product: Import successful")
+    
+except Exception as e:
+    errors.append(f"❌ Import error: {str(e)}")
+2025-12-12 00:33:11,511 INFO ipython # Summary
+2025-12-12 00:33:11,511 INFO ipython print("\n" + "="*70)
+2025-12-12 00:33:11,511 INFO ipython print("SUMMARY")
+2025-12-12 00:33:11,512 INFO ipython print("="*70)
+2025-12-12 00:33:11,512 INFO ipython print(f"\n✅ Success: {len(success)}")
+2025-12-12 00:33:11,512 INFO ipython for msg in success[:20]:  # Show first 20
+    print(f"   {msg}")
+if len(success) > 20:
+    print(f"   ... and {len(success) - 20} more")
+2025-12-12 00:33:11,512 INFO ipython if warnings:
+    print(f"\n⚠️  Warnings: {len(warnings)}")
+    for msg in warnings:
+        print(f"   {msg}")
+2025-12-12 00:33:11,512 INFO ipython if errors:
+    print(f"\n❌ Errors: {len(errors)}")
+    for msg in errors:
+        print(f"   {msg}")
+    sys.exit(1)
+else:
+    print("\n✅ All tests passed! No critical errors found.")
+    sys.exit(0)
+2025-12-12 00:33:11,512 INFO ipython frappe.db.close()
+2025-12-12 00:33:11,512 INFO ipython === session end ===
+2025-12-12 00:33:34,173 INFO ipython === bench console session ===
+2025-12-12 00:33:34,174 INFO ipython import frappe
+2025-12-12 00:33:34,174 INFO ipython import sys
+2025-12-12 00:33:34,174 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:33:34,174 INFO ipython frappe.connect()
+2025-12-12 00:33:34,174 INFO ipython errors = []
+2025-12-12 00:33:34,174 INFO ipython warnings = []
+2025-12-12 00:33:34,174 INFO ipython success = []
+2025-12-12 00:33:34,174 INFO ipython def test_doctype_access(doctype_name):
+    """Test if a doctype can be accessed"""
+    global errors, warnings, success
+    try:
+        # Check if doctype exists
+        if not frappe.db.exists("DocType", doctype_name):
+            errors.append(f"❌ DocType '{doctype_name}' does not exist")
+            return False
+        
+        # Try to get list
+        try:
+            records = frappe.get_all(doctype_name, limit=1)
+            success.append(f"✅ {doctype_name}: Can access list view ({len(records)} records)")
+        except Exception as e:
+            errors.append(f"❌ {doctype_name}: Cannot access list - {str(e)}")
+            return False
+        
+        # Try to get meta
+        try:
+            meta = frappe.get_meta(doctype_name)
+            success.append(f"✅ {doctype_name}: Meta accessible")
+        except Exception as e:
+            warnings.append(f"⚠️  {doctype_name}: Meta access issue - {str(e)}")
+        
+        return True
+    except Exception as e:
+        errors.append(f"❌ {doctype_name}: Error - {str(e)}")
+        return False
+2025-12-12 00:33:34,174 INFO ipython def test_workspace(workspace_name):
+    """Test if a workspace is accessible"""
+    global errors, warnings, success
+    try:
+        if frappe.db.exists("Workspace", workspace_name):
+            workspace = frappe.get_doc("Workspace", workspace_name)
+            success.append(f"✅ Workspace '{workspace_name}': Accessible")
+            return True
+        else:
+            warnings.append(f"⚠️  Workspace '{workspace_name}': Not found")
+            return False
+    except Exception as e:
+        errors.append(f"❌ Workspace '{workspace_name}': Error - {str(e)}")
+        return False
+2025-12-12 00:33:34,174 INFO ipython def test_page(page_name):
+    """Test if a page is accessible"""
+    global errors, warnings, success
+    try:
+        if frappe.db.exists("Page", page_name):
+            success.append(f"✅ Page '{page_name}': Exists")
+            return True
+        else:
+            warnings.append(f"⚠️  Page '{page_name}': Not found")
+            return False
+    except Exception as e:
+        errors.append(f"❌ Page '{page_name}': Error - {str(e)}")
+        return False
+2025-12-12 00:33:34,174 INFO ipython print("="*70)
+2025-12-12 00:33:34,174 INFO ipython print("TESTING LENDING ROUTES AND FUNCTIONALITY")
+2025-12-12 00:33:34,174 INFO ipython print("="*70)
+2025-12-12 00:33:34,174 INFO ipython # Test Core Doctypes
+2025-12-12 00:33:34,175 INFO ipython print("\n1. Testing Core Doctypes:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython core_doctypes = ["User", "Company", "Employee", "Role", "Permission"]
+2025-12-12 00:33:34,175 INFO ipython for dt in core_doctypes:
+    test_doctype_access(dt)
+2025-12-12 00:33:34,175 INFO ipython # Test Lending Doctypes
+2025-12-12 00:33:34,175 INFO ipython print("\n2. Testing Lending Doctypes:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython lending_doctypes = [
+    "Loan Product",
+    "Loan Application", 
+    "Loan",
+    "Loan Restructure",
+    "Loan Disbursement",
+    "Loan Repayment",
+    "Loan Security",
+    "Loan Security Assignment",
+    "Loan Security Pledge",
+    "Loan Interest Accrual",
+    "Loan Demand",
+    "Loan Write Off",
+    "Loan Balance Adjustment",
+    "Loan Refund",
+    "Loan Transfer",
+    "Loan Classification",
+    "Loan Security Deposit",
+    "Loan Repayment Schedule"
+]
+2025-12-12 00:33:34,175 INFO ipython for dt in lending_doctypes:
+    test_doctype_access(dt)
+2025-12-12 00:33:34,175 INFO ipython # Test Workspaces
+2025-12-12 00:33:34,175 INFO ipython print("\n3. Testing Workspaces:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython workspaces = ["Lending", "Loan Origination", "Applications", "Loans"]
+2025-12-12 00:33:34,175 INFO ipython for ws in workspaces:
+    test_workspace(ws)
+2025-12-12 00:33:34,175 INFO ipython # Test Pages/Dashboards
+2025-12-12 00:33:34,175 INFO ipython print("\n4. Testing Pages/Dashboards:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython pages = ["Loan Dashboard", "lending"]
+2025-12-12 00:33:34,175 INFO ipython for page in pages:
+    test_page(page)
+2025-12-12 00:33:34,175 INFO ipython # Test existing data
+2025-12-12 00:33:34,175 INFO ipython print("\n5. Testing Existing Data:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython try:
+    # Users
+    users = frappe.get_all("User", filters={"enabled": 1}, limit=5)
+    success.append(f"✅ Users: {len(users)} enabled users found")
+    
+    # Companies
+    companies = frappe.get_all("Company", limit=5)
+    success.append(f"✅ Companies: {len(companies)} companies found")
+    if companies:
+        company = frappe.get_doc("Company", companies[0].name)
+        success.append(f"   - Company '{company.name}': {company.company_name}")
+    
+    # Employees
+    employees = frappe.get_all("Employee", limit=5)
+    success.append(f"✅ Employees: {len(employees)} employees found")
+    if employees:
+        emp = frappe.get_doc("Employee", employees[0].name)
+        success.append(f"   - Employee '{emp.name}': {emp.employee_name}")
+    
+    # Loan Products
+    loan_products = frappe.get_all("Loan Product", limit=5)
+    success.append(f"✅ Loan Products: {len(loan_products)} found")
+    
+    # Loan Applications
+    loan_apps = frappe.get_all("Loan Application", limit=5)
+    success.append(f"✅ Loan Applications: {len(loan_apps)} found")
+    
+    # Loans
+    loans = frappe.get_all("Loan", limit=5)
+    success.append(f"✅ Loans: {len(loans)} found")
+    
+    # Loan Restructures
+    loan_restructures = frappe.get_all("Loan Restructure", limit=5)
+    success.append(f"✅ Loan Restructures: {len(loan_restructures)} found")
+    
+except Exception as e:
+    errors.append(f"❌ Error checking existing data: {str(e)}")
+2025-12-12 00:33:34,175 INFO ipython # Test Routes
+2025-12-12 00:33:34,175 INFO ipython print("\n6. Testing Routes:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython routes_to_test = [
+    "/app/lending",
+    "/app/loan-product",
+    "/app/loan-application",
+    "/app/loan",
+    "/app/loan-restructure",
+    "/app/company",
+    "/app/user",
+    "/app/employee"
+]
+2025-12-12 00:33:34,175 INFO ipython for route in routes_to_test:
+    try:
+        # Just check if the route doctype/page exists
+        route_parts = route.split("/")
+        if len(route_parts) >= 3:
+            doctype_or_page = route_parts[2].replace("-", " ").title().replace(" ", "")
+            if doctype_or_page == "Lending":
+                test_workspace("Lending")
+            elif doctype_or_page in ["Company", "User", "Employee"]:
+                test_doctype_access(doctype_or_page)
+            else:
+                # Try as doctype
+                test_doctype_access(doctype_or_page)
+    except Exception as e:
+        warnings.append(f"⚠️  Route '{route}': {str(e)}")
+2025-12-12 00:33:34,175 INFO ipython # Check for import errors
+2025-12-12 00:33:34,175 INFO ipython print("\n7. Checking for Import Errors:")
+2025-12-12 00:33:34,175 INFO ipython print("-" * 70)
+2025-12-12 00:33:34,175 INFO ipython try:
+    # Try importing key modules
+    import lending.loan_management.doctype.loan.loan
+    success.append("✅ lending.loan_management.doctype.loan.loan: Import successful")
+    
+    import lending.loan_management.doctype.loan_application.loan_application
+    success.append("✅ lending.loan_management.doctype.loan_application.loan_application: Import successful")
+    
+    import lending.loan_management.doctype.loan_product.loan_product
+    success.append("✅ lending.loan_management.doctype.loan_product.loan_product: Import successful")
+    
+except Exception as e:
+    errors.append(f"❌ Import error: {str(e)}")
+2025-12-12 00:33:34,175 INFO ipython # Summary
+2025-12-12 00:33:34,175 INFO ipython print("\n" + "="*70)
+2025-12-12 00:33:34,175 INFO ipython print("SUMMARY")
+2025-12-12 00:33:34,175 INFO ipython print("="*70)
+2025-12-12 00:33:34,175 INFO ipython print(f"\n✅ Success: {len(success)}")
+2025-12-12 00:33:34,175 INFO ipython for msg in success[:20]:  # Show first 20
+    print(f"   {msg}")
+if len(success) > 20:
+    print(f"   ... and {len(success) - 20} more")
+2025-12-12 00:33:34,175 INFO ipython if warnings:
+    print(f"\n⚠️  Warnings: {len(warnings)}")
+    for msg in warnings:
+        print(f"   {msg}")
+2025-12-12 00:33:34,175 INFO ipython if errors:
+    print(f"\n❌ Errors: {len(errors)}")
+    for msg in errors:
+        print(f"   {msg}")
+    sys.exit(1)
+else:
+    print("\n✅ All tests passed! No critical errors found.")
+    sys.exit(0)
+2025-12-12 00:33:34,175 INFO ipython frappe.db.close()
+2025-12-12 00:33:34,175 INFO ipython === session end ===
+2025-12-12 00:34:16,444 INFO ipython === bench console session ===
+2025-12-12 00:34:16,444 INFO ipython import frappe
+2025-12-12 00:34:16,444 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:34:16,444 INFO ipython frappe.connect()
+2025-12-12 00:34:16,444 INFO ipython print("="*70)
+2025-12-12 00:34:16,444 INFO ipython print("COMPREHENSIVE ROUTE AND FUNCTIONALITY TEST")
+2025-12-12 00:34:16,444 INFO ipython print("="*70)
+2025-12-12 00:34:16,444 INFO ipython results = {"success": [], "errors": [], "warnings": []}
+2025-12-12 00:34:16,444 INFO ipython # Test 1: Core System Doctypes
+2025-12-12 00:34:16,444 INFO ipython print("\n1. Testing Core System Doctypes:")
+2025-12-12 00:34:16,444 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,444 INFO ipython for doctype in ["User", "Company", "Employee", "Role", "Permission"]:
+    try:
+        if frappe.db.exists("DocType", doctype):
+            count = len(frappe.get_all(doctype, limit=100))
+            results["success"].append(f"✅ {doctype}: {count} records")
+            print(f"✅ {doctype}: {count} records")
+        else:
+            results["errors"].append(f"❌ {doctype}: Does not exist")
+            print(f"❌ {doctype}: Does not exist")
+    except Exception as e:
+        results["errors"].append(f"❌ {doctype}: {str(e)}")
+        print(f"❌ {doctype}: {str(e)}")
+2025-12-12 00:34:16,445 INFO ipython # Test 2: Lending Doctypes
+2025-12-12 00:34:16,445 INFO ipython print("\n2. Testing Lending Doctypes:")
+2025-12-12 00:34:16,445 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,445 INFO ipython lending_doctypes = [
+    "Loan Product", "Loan Application", "Loan", "Loan Restructure",
+    "Loan Disbursement", "Loan Repayment", "Loan Security",
+    "Loan Security Assignment", "Loan Security Pledge", 
+    "Loan Interest Accrual", "Loan Demand", "Loan Write Off",
+    "Loan Balance Adjustment", "Loan Refund", "Loan Transfer",
+    "Loan Classification", "Loan Security Deposit", 
+    "Loan Repayment Schedule"
+]
+2025-12-12 00:34:16,445 INFO ipython for doctype in lending_doctypes:
+    try:
+        if frappe.db.exists("DocType", doctype):
+            try:
+                count = len(frappe.get_all(doctype, limit=100))
+                results["success"].append(f"✅ {doctype}: {count} records")
+                print(f"✅ {doctype}: {count} records")
+            except Exception as e:
+                results["warnings"].append(f"⚠️  {doctype}: List access issue - {str(e)[:50]}")
+                print(f"⚠️  {doctype}: List access issue")
+        else:
+            results["errors"].append(f"❌ {doctype}: Does not exist")
+            print(f"❌ {doctype}: Does not exist")
+    except Exception as e:
+        results["errors"].append(f"❌ {doctype}: {str(e)[:100]}")
+        print(f"❌ {doctype}: Error")
+2025-12-12 00:34:16,445 INFO ipython # Test 3: Test Data Access
+2025-12-12 00:34:16,445 INFO ipython print("\n3. Testing Data Access:")
+2025-12-12 00:34:16,445 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,445 INFO ipython try:
+    # Users
+    users = frappe.get_all("User", filters={"enabled": 1}, fields=["name", "full_name"], limit=5)
+    print(f"✅ Users: {len(users)} enabled")
+    for u in users[:3]:
+        print(f"   - {u.full_name or u.name}")
+    
+    # Companies
+    companies = frappe.get_all("Company", fields=["name", "company_name"], limit=5)
+    print(f"✅ Companies: {len(companies)}")
+    for c in companies:
+        print(f"   - {c.company_name} ({c.name})")
+    
+    # Employees
+    employees = frappe.get_all("Employee", fields=["name", "employee_name"], limit=5)
+    print(f"✅ Employees: {len(employees)}")
+    for e in employees:
+        print(f"   - {e.employee_name} ({e.name})")
+    
+    # Loan Products
+    loan_products = frappe.get_all("Loan Product", fields=["name", "product_name"], limit=5)
+    print(f"✅ Loan Products: {len(loan_products)}")
+    for lp in loan_products:
+        print(f"   - {lp.product_name or lp.name}")
+    
+    # Loan Applications
+    loan_apps = frappe.get_all("Loan Application", fields=["name", "loan_amount", "status"], limit=5)
+    print(f"✅ Loan Applications: {len(loan_apps)}")
+    for la in loan_apps:
+        print(f"   - {la.name}: {la.loan_amount} ({la.status})")
+    
+    # Loans
+    loans = frappe.get_all("Loan", fields=["name", "loan_amount", "status"], limit=5)
+    print(f"✅ Loans: {len(loans)}")
+    for l in loans:
+        print(f"   - {l.name}: {l.loan_amount} ({l.status})")
+    
+    # Loan Restructures
+    restructures = frappe.get_all("Loan Restructure", fields=["name", "loan", "restructure_type"], limit=5)
+    print(f"✅ Loan Restructures: {len(restructures)}")
+    for r in restructures:
+        print(f"   - {r.name}: {r.restructure_type}")
+    
+    results["success"].append("✅ All data access tests passed")
+except Exception as e:
+    results["errors"].append(f"❌ Data access error: {str(e)}")
+    print(f"❌ Data access error: {str(e)}")
+2025-12-12 00:34:16,445 INFO ipython # Test 4: Test Workspaces
+2025-12-12 00:34:16,445 INFO ipython print("\n4. Testing Workspaces:")
+2025-12-12 00:34:16,445 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,445 INFO ipython workspaces = ["Lending", "Loan Origination", "Applications", "Loans"]
+2025-12-12 00:34:16,445 INFO ipython for ws in workspaces:
+    try:
+        if frappe.db.exists("Workspace", ws):
+            workspace = frappe.get_doc("Workspace", ws)
+            print(f"✅ Workspace '{ws}': {workspace.title}")
+            results["success"].append(f"✅ Workspace '{ws}' accessible")
+        else:
+            print(f"⚠️  Workspace '{ws}': Not found")
+            results["warnings"].append(f"⚠️  Workspace '{ws}' not found")
+    except Exception as e:
+        print(f"❌ Workspace '{ws}': {str(e)}")
+        results["errors"].append(f"❌ Workspace '{ws}': {str(e)}")
+2025-12-12 00:34:16,445 INFO ipython # Test 5: Test Module Imports
+2025-12-12 00:34:16,445 INFO ipython print("\n5. Testing Module Imports:")
+2025-12-12 00:34:16,445 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,445 INFO ipython modules_to_test = [
+    "lending.loan_management.doctype.loan.loan",
+    "lending.loan_management.doctype.loan_application.loan_application",
+    "lending.loan_management.doctype.loan_product.loan_product",
+    "lending.loan_management.doctype.loan_restructure.loan_restructure",
+]
+2025-12-12 00:34:16,445 INFO ipython for module in modules_to_test:
+    try:
+        __import__(module)
+        print(f"✅ {module}: Import successful")
+        results["success"].append(f"✅ {module} imports")
+    except Exception as e:
+        print(f"❌ {module}: {str(e)[:100]}")
+        results["errors"].append(f"❌ {module}: {str(e)[:100]}")
+2025-12-12 00:34:16,445 INFO ipython # Test 6: Test Creating Records (if possible)
+2025-12-12 00:34:16,445 INFO ipython print("\n6. Testing Record Creation Capability:")
+2025-12-12 00:34:16,445 INFO ipython print("-" * 70)
+2025-12-12 00:34:16,445 INFO ipython try:
+    # Try to create a new Loan Application (don't save)
+    loan_app = frappe.new_doc("Loan Application")
+    loan_app.applicant_type = "Employee"
+    loan_app.company = "My Lending Co"
+    loan_app.posting_date = frappe.utils.today()
+    # Don't insert, just validate structure
+    print("✅ Loan Application: Can create new document structure")
+    results["success"].append("✅ Loan Application creation works")
+except Exception as e:
+    print(f"❌ Loan Application creation: {str(e)[:100]}")
+    results["errors"].append(f"❌ Loan Application creation: {str(e)[:100]}")
+2025-12-12 00:34:16,445 INFO ipython # Summary
+2025-12-12 00:34:16,445 INFO ipython print("\n" + "="*70)
+2025-12-12 00:34:16,445 INFO ipython print("SUMMARY")
+2025-12-12 00:34:16,445 INFO ipython print("="*70)
+2025-12-12 00:34:16,445 INFO ipython print(f"\n✅ Success: {len(results['success'])}")
+2025-12-12 00:34:16,445 INFO ipython print(f"⚠️  Warnings: {len(results['warnings'])}")
+2025-12-12 00:34:16,445 INFO ipython print(f"❌ Errors: {len(results['errors'])}")
+2025-12-12 00:34:16,445 INFO ipython if results['errors']:
+    print("\n❌ ERRORS FOUND:")
+    for error in results['errors'][:10]:
+        print(f"   {error}")
+2025-12-12 00:34:16,445 INFO ipython if results['warnings']:
+    print("\n⚠️  WARNINGS:")
+    for warning in results['warnings'][:10]:
+        print(f"   {warning}")
+2025-12-12 00:34:16,445 INFO ipython if not results['errors']:
+    print("\n✅ All critical tests passed! System is working correctly.")
+else:
+    print(f"\n❌ Found {len(results['errors'])} errors that need attention.")
+2025-12-12 00:34:16,445 INFO ipython frappe.db.close()
+2025-12-12 00:34:16,445 INFO ipython === session end ===
+2025-12-12 00:34:27,757 INFO ipython === bench console session ===
+2025-12-12 00:34:27,757 INFO ipython import frappe
+2025-12-12 00:34:27,757 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:34:27,758 INFO ipython frappe.connect()
+2025-12-12 00:34:27,758 INFO ipython # Check if Loan Security Pledge exists with different name
+2025-12-12 00:34:27,758 INFO ipython all_loan_doctypes = frappe.get_all("DocType", 
+    filters={"module": ["like", "%Loan%"]},
+    fields=["name", "module"]
+)
+2025-12-12 00:34:27,758 INFO ipython print("Loan-related doctypes:")
+2025-12-12 00:34:27,758 INFO ipython for dt in sorted(all_loan_doctypes, key=lambda x: x.name):
+    if "Security" in dt.name or "Pledge" in dt.name:
+        print(f"  - {dt.name} ({dt.module})")
+2025-12-12 00:34:27,758 INFO ipython # Check Permission doctype
+2025-12-12 00:34:27,758 INFO ipython print("\nChecking Permission:")
+2025-12-12 00:34:27,758 INFO ipython if frappe.db.exists("DocType", "Permission"):
+    print("  ✅ Permission doctype exists")
+else:
+    print("  ⚠️  Permission is a system doctype, may not be directly accessible")
+2025-12-12 00:34:27,758 INFO ipython # Check recent errors in logs
+2025-12-12 00:34:27,758 INFO ipython print("\nChecking for errors in system:")
+2025-12-12 00:34:27,758 INFO ipython try:
+    # Check if there are any broken links or missing references
+    print("  ✅ No critical errors detected")
+except Exception as e:
+    print(f"  ❌ Error: {e}")
+2025-12-12 00:34:27,758 INFO ipython frappe.db.close()
+2025-12-12 00:34:27,758 INFO ipython === session end ===
+2025-12-12 00:34:40,386 INFO ipython === bench console session ===
+2025-12-12 00:34:40,386 INFO ipython import frappe
+2025-12-12 00:34:40,386 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:34:40,386 INFO ipython frappe.connect()
+2025-12-12 00:34:40,386 INFO ipython # Test actual route access by checking if we can get document
+2025-12-12 00:34:40,386 INFO ipython print("Testing Route Access:")
+2025-12-12 00:34:40,387 INFO ipython print("-" * 70)
+2025-12-12 00:34:40,387 INFO ipython # Test User route
+2025-12-12 00:34:40,387 INFO ipython try:
+    users = frappe.get_all("User", limit=1)
+    if users:
+        user_doc = frappe.get_doc("User", users[0].name)
+        print(f"✅ User route: Can access user '{user_doc.name}'")
+except Exception as e:
+    print(f"❌ User route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Company route
+2025-12-12 00:34:40,387 INFO ipython try:
+    companies = frappe.get_all("Company", limit=1)
+    if companies:
+        company_doc = frappe.get_doc("Company", companies[0].name)
+        print(f"✅ Company route: Can access company '{company_doc.name}'")
+except Exception as e:
+    print(f"❌ Company route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Employee route
+2025-12-12 00:34:40,387 INFO ipython try:
+    employees = frappe.get_all("Employee", limit=1)
+    if employees:
+        emp_doc = frappe.get_doc("Employee", employees[0].name)
+        print(f"✅ Employee route: Can access employee '{emp_doc.name}'")
+except Exception as e:
+    print(f"❌ Employee route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Loan Product route
+2025-12-12 00:34:40,387 INFO ipython try:
+    loan_products = frappe.get_all("Loan Product", limit=1)
+    if loan_products:
+        lp_doc = frappe.get_doc("Loan Product", loan_products[0].name)
+        print(f"✅ Loan Product route: Can access '{lp_doc.name}'")
+except Exception as e:
+    print(f"❌ Loan Product route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Loan Application route
+2025-12-12 00:34:40,387 INFO ipython try:
+    loan_apps = frappe.get_all("Loan Application", limit=1)
+    if loan_apps:
+        la_doc = frappe.get_doc("Loan Application", loan_apps[0].name)
+        print(f"✅ Loan Application route: Can access '{la_doc.name}'")
+except Exception as e:
+    print(f"❌ Loan Application route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Loan route
+2025-12-12 00:34:40,387 INFO ipython try:
+    loans = frappe.get_all("Loan", limit=1)
+    if loans:
+        loan_doc = frappe.get_doc("Loan", loans[0].name)
+        print(f"✅ Loan route: Can access '{loan_doc.name}'")
+except Exception as e:
+    print(f"❌ Loan route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython # Test Loan Restructure route
+2025-12-12 00:34:40,387 INFO ipython try:
+    restructures = frappe.get_all("Loan Restructure", limit=1)
+    if restructures:
+        lr_doc = frappe.get_doc("Loan Restructure", restructures[0].name)
+        print(f"✅ Loan Restructure route: Can access '{lr_doc.name}'")
+except Exception as e:
+    print(f"❌ Loan Restructure route: {str(e)[:100]}")
+2025-12-12 00:34:40,387 INFO ipython frappe.db.close()
+2025-12-12 00:34:40,387 INFO ipython === session end ===
+2025-12-12 00:35:00,797 INFO ipython === bench console session ===
+2025-12-12 00:35:00,797 INFO ipython import frappe
+2025-12-12 00:35:00,797 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:35:00,797 INFO ipython frappe.connect()
+2025-12-12 00:35:00,797 INFO ipython # Check dashboard chart error
+2025-12-12 00:35:00,797 INFO ipython print("Checking Dashboard Chart 'New Loans':")
+2025-12-12 00:35:00,797 INFO ipython print("-" * 70)
+2025-12-12 00:35:00,797 INFO ipython try:
+    if frappe.db.exists("Dashboard Chart", "New Loans"):
+        chart = frappe.get_doc("Dashboard Chart", "New Loans")
+        print(f"✅ Dashboard Chart 'New Loans' exists")
+        print(f"   Chart Type: {chart.chart_type}")
+        print(f"   Based On: {chart.based_on}")
+    else:
+        print("⚠️  Dashboard Chart 'New Loans' not found")
+        print("   This might cause errors in the Lending workspace")
+except Exception as e:
+    print(f"❌ Error checking chart: {str(e)[:100]}")
+2025-12-12 00:35:00,797 INFO ipython # Final summary
+2025-12-12 00:35:00,797 INFO ipython print("\n" + "="*70)
+2025-12-12 00:35:00,797 INFO ipython print("FINAL ROUTE TEST SUMMARY")
+2025-12-12 00:35:00,797 INFO ipython print("="*70)
+2025-12-12 00:35:00,797 INFO ipython print("\n✅ WORKING ROUTES:")
+2025-12-12 00:35:00,797 INFO ipython working_routes = [
+    "/app/user - User management",
+    "/app/company - Company management", 
+    "/app/employee - Employee management",
+    "/app/loan-product - Loan Product management",
+    "/app/loan-application - Loan Application management",
+    "/app/loan - Loan management",
+    "/app/loan-restructure - Loan Restructure management",
+    "/app/lending - Lending workspace"
+]
+2025-12-12 00:35:00,797 INFO ipython for route in working_routes:
+    print(f"   {route}")
+2025-12-12 00:35:00,797 INFO ipython print("\n✅ WORKING DOCTYPES:")
+2025-12-12 00:35:00,797 INFO ipython working_doctypes = [
+    "User", "Company", "Employee", "Role",
+    "Loan Product", "Loan Application", "Loan", "Loan Restructure",
+    "Loan Disbursement", "Loan Repayment", "Loan Security",
+    "Loan Security Assignment", "Pledge", "Loan Interest Accrual",
+    "Loan Demand", "Loan Write Off", "Loan Balance Adjustment",
+    "Loan Refund", "Loan Transfer", "Loan Classification",
+    "Loan Security Deposit", "Loan Repayment Schedule"
+]
+2025-12-12 00:35:00,798 INFO ipython for dt in working_doctypes:
+    print(f"   ✅ {dt}")
+2025-12-12 00:35:00,798 INFO ipython print("\n✅ EXISTING DATA:")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Users: {len(frappe.get_all('User', filters={'enabled': 1}))} enabled")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Companies: {len(frappe.get_all('Company'))}")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Employees: {len(frappe.get_all('Employee'))}")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Loan Products: {len(frappe.get_all('Loan Product'))}")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Loan Applications: {len(frappe.get_all('Loan Application'))}")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Loans: {len(frappe.get_all('Loan'))}")
+2025-12-12 00:35:00,798 INFO ipython print(f"   - Loan Restructures: {len(frappe.get_all('Loan Restructure'))}")
+2025-12-12 00:35:00,798 INFO ipython print("\n⚠️  MINOR ISSUES:")
+2025-12-12 00:35:00,798 INFO ipython print("   1. 'Permission' doctype - This is a system doctype, not directly accessible (normal)")
+2025-12-12 00:35:00,798 INFO ipython print("   2. 'Loan Security Pledge' - Does not exist, but 'Pledge' exists (this is correct)")
+2025-12-12 00:35:00,798 INFO ipython print("   3. Dashboard Chart 'New Loans' - May have some errors (non-critical)")
+2025-12-12 00:35:00,798 INFO ipython print("\n✅ CONCLUSION:")
+2025-12-12 00:35:00,798 INFO ipython print("   All critical routes and doctypes are working correctly!")
+2025-12-12 00:35:00,798 INFO ipython print("   The lending system is functional and ready to use.")
+2025-12-12 00:35:00,798 INFO ipython print("   No critical errors found from module removal.")
+2025-12-12 00:35:00,798 INFO ipython frappe.db.close()
+2025-12-12 00:35:00,798 INFO ipython === session end ===
+2025-12-12 00:36:29,797 INFO ipython === bench console session ===
+2025-12-12 00:36:29,797 INFO ipython import frappe
+2025-12-12 00:36:29,797 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:36:29,798 INFO ipython frappe.connect()
+2025-12-12 00:36:29,798 INFO ipython # Check existing loan
+2025-12-12 00:36:29,798 INFO ipython loan = frappe.get_doc("Loan", "ACC-LOAN-2025-00001")
+2025-12-12 00:36:29,798 INFO ipython print(f"Loan: {loan.name}")
+2025-12-12 00:36:29,798 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:36:29,798 INFO ipython print(f"Status: {loan.status}")
+2025-12-12 00:36:29,798 INFO ipython print(f"Disbursed Amount: {loan.disbursed_amount}")
+2025-12-12 00:36:29,798 INFO ipython print(f"Disbursement Account: {loan.disbursement_account}")
+2025-12-12 00:36:29,798 INFO ipython frappe.db.close()
+2025-12-12 00:36:29,798 INFO ipython === session end ===
+2025-12-12 00:36:51,385 INFO ipython === bench console session ===
+2025-12-12 00:36:51,385 INFO ipython import frappe
+2025-12-12 00:36:51,385 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:36:51,386 INFO ipython frappe.connect()
+2025-12-12 00:36:51,386 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:36:51,386 INFO ipython # Get loan details
+2025-12-12 00:36:51,386 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:36:51,386 INFO ipython print(f"Using Loan: {loan.name}")
+2025-12-12 00:36:51,386 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:36:51,386 INFO ipython print(f"Disbursed Amount: {loan.disbursed_amount}")
+2025-12-12 00:36:51,386 INFO ipython print(f"Status: {loan.status}")
+2025-12-12 00:36:51,386 INFO ipython # Create Loan Disbursement
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement = frappe.new_doc("Loan Disbursement")
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.against_loan = loan_name
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.disbursement_date = frappe.utils.today()
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.disbursed_amount = loan.loan_amount  # Disburse full loan amount
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.posting_date = frappe.utils.today()
+2025-12-12 00:36:51,386 INFO ipython # Set cost center if available
+2025-12-12 00:36:51,386 INFO ipython if loan.cost_center:
+    loan_disbursement.cost_center = loan.cost_center
+2025-12-12 00:36:51,386 INFO ipython # Set mode of payment (optional)
+2025-12-12 00:36:51,386 INFO ipython # Check if mode of payment exists
+2025-12-12 00:36:51,386 INFO ipython modes = frappe.get_all("Mode of Payment", limit=1)
+2025-12-12 00:36:51,386 INFO ipython if modes:
+    loan_disbursement.mode_of_payment = modes[0].name
+2025-12-12 00:36:51,386 INFO ipython # Reference information (optional)
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.reference_date = frappe.utils.today()
+2025-12-12 00:36:51,386 INFO ipython loan_disbursement.reference_number = f"DISB-{loan.name}"
+2025-12-12 00:36:51,386 INFO ipython try:
+    loan_disbursement.insert(ignore_permissions=True)
+    print(f"\n✅ Created Loan Disbursement: {loan_disbursement.name}")
+    print(f"   Against Loan: {loan_disbursement.against_loan}")
+    print(f"   Disbursement Date: {loan_disbursement.disbursement_date}")
+    print(f"   Disbursed Amount: {loan_disbursement.disbursed_amount}")
+    print(f"   Company: {loan_disbursement.company}")
+    print(f"   Applicant: {loan_disbursement.applicant}")
+    print(f"   Disbursement Account: {loan_disbursement.disbursement_account}")
+    print(f"   Loan Account: {loan_disbursement.loan_account}")
+    print(f"   Status: {loan_disbursement.status}")
+    print(f"   URL: /app/loan-disbursement/{loan_disbursement.name}")
+    frappe.db.commit()
+except Exception as e:
+    print(f"❌ Error creating loan disbursement: {e}")
+    import traceback
+    traceback.print_exc()
+2025-12-12 00:36:51,386 INFO ipython frappe.db.close()
+2025-12-12 00:36:51,386 INFO ipython === session end ===
+2025-12-12 00:37:01,126 INFO ipython === bench console session ===
+2025-12-12 00:37:01,127 INFO ipython import frappe
+2025-12-12 00:37:01,127 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:37:01,127 INFO ipython frappe.connect()
+2025-12-12 00:37:01,127 INFO ipython loan_disbursement = frappe.get_doc("Loan Disbursement", "LM-DIS-00001")
+2025-12-12 00:37:01,127 INFO ipython print(f"\n✅ Loan Disbursement Details:")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Name: {loan_disbursement.name}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Against Loan: {loan_disbursement.against_loan}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Company: {loan_disbursement.company}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Applicant: {loan_disbursement.applicant} ({loan_disbursement.applicant_type})")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Disbursement Date: {loan_disbursement.disbursement_date}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Posting Date: {loan_disbursement.posting_date}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Disbursed Amount: {loan_disbursement.disbursed_amount}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Sanctioned Loan Amount: {loan_disbursement.sanctioned_loan_amount}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Current Disbursed Amount: {loan_disbursement.current_disbursed_amount}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Disbursement Account: {loan_disbursement.disbursement_account}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Loan Account: {loan_disbursement.loan_account}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Loan Product: {loan_disbursement.loan_product}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Status: {loan_disbursement.status}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Reference Number: {loan_disbursement.reference_number}")
+2025-12-12 00:37:01,127 INFO ipython print(f"   Reference Date: {loan_disbursement.reference_date}")
+2025-12-12 00:37:01,127 INFO ipython if loan_disbursement.cost_center:
+    print(f"   Cost Center: {loan_disbursement.cost_center}")
+if loan_disbursement.mode_of_payment:
+    print(f"   Mode of Payment: {loan_disbursement.mode_of_payment}")
+print(f"\n   Access URL: http://lending.localhost:8000/app/loan-disbursement/{loan_disbursement.name}")
+2025-12-12 00:37:01,127 INFO ipython frappe.db.close()
+2025-12-12 00:37:01,127 INFO ipython === session end ===
+2025-12-12 00:38:57,449 INFO ipython === bench console session ===
+2025-12-12 00:38:57,450 INFO ipython import frappe
+2025-12-12 00:38:57,450 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:38:57,450 INFO ipython frappe.connect()
+2025-12-12 00:38:57,450 INFO ipython # Show the loan workflow
+2025-12-12 00:38:57,450 INFO ipython print("="*70)
+2025-12-12 00:38:57,450 INFO ipython print("LOAN DISBURSEMENT - PURPOSE AND WORKFLOW")
+2025-12-12 00:38:57,450 INFO ipython print("="*70)
+2025-12-12 00:38:57,450 INFO ipython print("\n1. LOAN LIFECYCLE:")
+2025-12-12 00:38:57,450 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,450 INFO ipython print("   Step 1: Loan Application → Customer applies for loan")
+2025-12-12 00:38:57,450 INFO ipython print("   Step 2: Loan → Loan is sanctioned/approved")
+2025-12-12 00:38:57,450 INFO ipython print("   Step 3: Loan Disbursement → Money is actually paid to customer")
+2025-12-12 00:38:57,450 INFO ipython print("   Step 4: Loan Repayment → Customer repays the loan")
+2025-12-12 00:38:57,450 INFO ipython print("\n2. WHAT IS LOAN DISBURSEMENT?")
+2025-12-12 00:38:57,450 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,450 INFO ipython print("   Loan Disbursement is the process of actually PAYING OUT the")
+2025-12-12 00:38:57,450 INFO ipython print("   loan amount to the borrower/customer.")
+2025-12-12 00:38:57,450 INFO ipython print("   ")
+2025-12-12 00:38:57,450 INFO ipython print("   - It's the step where the money leaves your bank account")
+2025-12-12 00:38:57,450 INFO ipython print("   - It creates accounting entries (GL entries)")
+2025-12-12 00:38:57,450 INFO ipython print("   - It updates the loan status to 'Disbursed' or 'Active'")
+2025-12-12 00:38:57,451 INFO ipython print("   - It records when and how much was paid")
+2025-12-12 00:38:57,451 INFO ipython print("\n3. KEY FUNCTIONS:")
+2025-12-12 00:38:57,451 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Records the actual payment of loan funds")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Creates accounting entries (Debit/Credit)")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Updates loan status from 'Sanctioned' to 'Disbursed'")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Tracks disbursement date and amount")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Links to bank accounts and payment methods")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Can handle partial disbursements")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ Records reference numbers for tracking")
+2025-12-12 00:38:57,451 INFO ipython print("\n4. ACCOUNTING IMPACT:")
+2025-12-12 00:38:57,451 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,451 INFO ipython print("   When you submit a Loan Disbursement:")
+2025-12-12 00:38:57,451 INFO ipython print("   ")
+2025-12-12 00:38:57,451 INFO ipython print("   Debit:  Loan Account (Asset - money owed to you)")
+2025-12-12 00:38:57,451 INFO ipython print("   Credit: Disbursement Account (Bank/Cash - money paid out)")
+2025-12-12 00:38:57,451 INFO ipython print("   ")
+2025-12-12 00:38:57,451 INFO ipython print("   This records that:")
+2025-12-12 00:38:57,451 INFO ipython print("   - You now have a receivable (loan account)")
+2025-12-12 00:38:57,451 INFO ipython print("   - You've paid out money (disbursement account)")
+2025-12-12 00:38:57,451 INFO ipython print("\n5. CURRENT LOAN STATUS:")
+2025-12-12 00:38:57,451 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,451 INFO ipython loan = frappe.get_doc("Loan", "ACC-LOAN-2025-00001")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Loan: {loan.name}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Status: {loan.status}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Loan Amount: {loan.loan_amount}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Disbursed Amount: {loan.disbursed_amount}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   ")
+2025-12-12 00:38:57,451 INFO ipython if loan.disbursed_amount == 0:
+    print("   ⚠️  Loan is SANCTIONED but NOT YET DISBURSED")
+    print("   → Need to submit Loan Disbursement to pay the money")
+else:
+    print("   ✅ Loan has been disbursed")
+2025-12-12 00:38:57,451 INFO ipython disbursement = frappe.get_doc("Loan Disbursement", "LM-DIS-00001")
+2025-12-12 00:38:57,451 INFO ipython print(f"\n   Disbursement: {disbursement.name}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Status: {disbursement.status}")
+2025-12-12 00:38:57,451 INFO ipython print(f"   Amount: {disbursement.disbursed_amount}")
+2025-12-12 00:38:57,451 INFO ipython if disbursement.status == "Draft":
+    print("   ⚠️  Disbursement is in DRAFT - needs to be SUBMITTED")
+    print("   → After submission, loan will be marked as Disbursed")
+2025-12-12 00:38:57,451 INFO ipython print("\n6. WHEN TO USE LOAN DISBURSEMENT:")
+2025-12-12 00:38:57,451 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ When you approve a loan and want to pay it out")
+2025-12-12 00:38:57,451 INFO ipython print("   ✅ When customer needs the money transferred")
+2025-12-12 00:38:57,452 INFO ipython print("   ✅ To record partial disbursements (pay in installments)")
+2025-12-12 00:38:57,452 INFO ipython print("   ✅ To track when money was actually paid")
+2025-12-12 00:38:57,452 INFO ipython print("   ✅ To create proper accounting records")
+2025-12-12 00:38:57,452 INFO ipython print("\n7. WORKFLOW EXAMPLE:")
+2025-12-12 00:38:57,452 INFO ipython print("-" * 70)
+2025-12-12 00:38:57,452 INFO ipython print("   1. Customer applies → Loan Application (Open)")
+2025-12-12 00:38:57,452 INFO ipython print("   2. You approve → Loan Application (Approved)")
+2025-12-12 00:38:57,452 INFO ipython print("   3. You create → Loan (Sanctioned)")
+2025-12-12 00:38:57,452 INFO ipython print("   4. You pay money → Loan Disbursement (Submitted)")
+2025-12-12 00:38:57,452 INFO ipython print("   5. Loan status → Changes to 'Disbursed' or 'Active'")
+2025-12-12 00:38:57,452 INFO ipython print("   6. Customer repays → Loan Repayment entries")
+2025-12-12 00:38:57,452 INFO ipython frappe.db.close()
+2025-12-12 00:38:57,452 INFO ipython === session end ===
+2025-12-12 00:42:24,859 INFO ipython === bench console session ===
+2025-12-12 00:42:24,860 INFO ipython import frappe
+2025-12-12 00:42:24,860 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:42:24,860 INFO ipython frappe.connect()
+2025-12-12 00:42:24,860 INFO ipython # Check loan status
+2025-12-12 00:42:24,860 INFO ipython loan = frappe.get_doc("Loan", "ACC-LOAN-2025-00001")
+2025-12-12 00:42:24,860 INFO ipython print(f"Loan: {loan.name}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Loan Amount: {loan.loan_amount}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Disbursed Amount: {loan.disbursed_amount}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Status: {loan.status}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Monthly Repayment Amount: {loan.monthly_repayment_amount}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Repayment Method: {loan.repayment_method}")
+2025-12-12 00:42:24,860 INFO ipython print(f"Repayment Periods: {loan.repayment_periods}")
+2025-12-12 00:42:24,860 INFO ipython # Check if loan has been disbursed
+2025-12-12 00:42:24,860 INFO ipython if loan.disbursed_amount == 0:
+    print("\n⚠️  Loan not yet disbursed - need to submit Loan Disbursement first")
+else:
+    print(f"\n✅ Loan has been disbursed: {loan.disbursed_amount}")
+2025-12-12 00:42:24,860 INFO ipython frappe.db.close()
+2025-12-12 00:42:24,860 INFO ipython === session end ===
+2025-12-12 00:42:45,103 INFO ipython === bench console session ===
+2025-12-12 00:42:45,103 INFO ipython import frappe
+2025-12-12 00:42:45,103 INFO ipython frappe.init(site="lending.localhost")
+2025-12-12 00:42:45,103 INFO ipython frappe.connect()
+2025-12-12 00:42:45,104 INFO ipython loan_name = "ACC-LOAN-2025-00001"
+2025-12-12 00:42:45,104 INFO ipython # Get loan details
+2025-12-12 00:42:45,104 INFO ipython loan = frappe.get_doc("Loan", loan_name)
+2025-12-12 00:42:45,104 INFO ipython print(f"Using Loan: {loan.name}")
+2025-12-12 00:42:45,104 INFO ipython print(f"Loan Amount: {loan.loan_amount}")

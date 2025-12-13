@@ -1988,3 +1988,17 @@ frappe.exceptions.MandatoryError: [Item, SKU001]: stock_uom
 2025-12-12 00:54:00,789 Successfully completed frappe.utils.background_jobs.execute_job(event=None, is_async=True, job_name='frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_jo..., kwargs={'job_type': 'frappe.integrations.doctype.google_calendar.google_calendar.s..., method='frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_jo..., site='lending.localhost', user='Administrator') job in 0:00:00.226963s on worker 38670a020d944ce49cbffd301ea6fd86
 2025-12-12 00:54:00,789 Users-prom3-Desktop-regal-frappe-bench:default: Job OK (lending.localhost||scheduled_job||uubt233e7n)
 2025-12-12 00:54:00,789 Result is kept for 600 seconds
+2025-12-13 17:05:16,153 Worker rq:worker:5b3e23fb1ff5405a8ead04cf897142e2 started with PID 73970, version 2.4.0
+2025-12-13 17:05:16,153 Subscribing to channel rq:pubsub:5b3e23fb1ff5405a8ead04cf897142e2
+2025-12-13 17:05:16,154 *** Listening on Users-prom3-Desktop-regal-frappe-bench:short, Users-prom3-Desktop-regal-frappe-bench:default, Users-prom3-Desktop-regal-frappe-bench:long...
+2025-12-13 17:05:16,154 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:short
+2025-12-13 17:05:16,155 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:default
+2025-12-13 17:05:16,156 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:long
+2025-12-13 17:05:16,523 Worker 5b3e23fb1ff5405a8ead04cf897142e2 [PID 73970]: warm shut down requested
+2025-12-13 17:05:16,524 Unsubscribing from channel rq:pubsub:5b3e23fb1ff5405a8ead04cf897142e2
+2025-12-13 17:06:14,084 Worker rq:worker:2aa11b63871b43b89b8586ad8c87f5b4 started with PID 75796, version 2.4.0
+2025-12-13 17:06:14,085 Subscribing to channel rq:pubsub:2aa11b63871b43b89b8586ad8c87f5b4
+2025-12-13 17:06:14,085 *** Listening on Users-prom3-Desktop-regal-frappe-bench:short, Users-prom3-Desktop-regal-frappe-bench:default, Users-prom3-Desktop-regal-frappe-bench:long...
+2025-12-13 17:06:14,085 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:short
+2025-12-13 17:06:14,086 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:default
+2025-12-13 17:06:14,086 Cleaning registries for queue: Users-prom3-Desktop-regal-frappe-bench:long

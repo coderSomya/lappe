@@ -76,3 +76,18 @@ Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'tim
 2025-12-13 12:56:38,030 ERROR frappe New Exception collected in error log
 Site: lending.localhost
 Form Dict: {}
+2025-12-13 15:47:04,142 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'company_name': 'Test Lending Company', 'abbr': 'TLC', 'default_currency': 'INR', 'country': 'India'}
+2025-12-13 15:47:50,083 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'company_name': 'Test Company Direct', 'abbr': 'TCD', 'default_currency': 'INR', 'country': 'India'}
+2025-12-13 15:52:37,653 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'company_name': 'Acme Corporation', 'abbr': 'ACME', 'default_currency': 'INR', 'country': 'India'}
+2025-12-13 15:54:15,001 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'company_name': 'Acme Corporation', 'abbr': 'ACME', 'default_currency': 'INR', 'country': 'India'}
+2025-12-13 15:55:34,149 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {'company_name': 'Test Company API', 'abbr': 'TCA', 'default_currency': 'INR', 'country': 'India'}

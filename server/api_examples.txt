@@ -4,6 +4,74 @@
 ################################################################################
 
 ################################################################################
+#                              COMPANY                                        #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new company
+# ────────────────────────────────────────────────────────────────────────────
+# Required fields: company_name, abbr
+# Optional fields: default_currency, country, and account fields
+#
+# ✅ Company creation now works via API using a custom method that bypasses
+#    warehouse creation. This is safe for lending operations.
+#
+curl -X POST http://localhost:5001/api/companies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_name": "Acme Corporation",
+    "abbr": "ACME",
+    "default_currency": "INR",
+    "country": "India"
+  }'
+
+# Minimal example (only required fields):
+curl -X POST http://localhost:5001/api/companies \
+  -H "Content-Type: application/json" \
+  -d '{"company_name": "Test Company", "abbr": "TC"}'
+
+# Expected Response:
+# {
+#   "data": {
+#     "name": "Acme Corporation",
+#     "company_name": "Acme Corporation",
+#     "abbr": "ACME",
+#     "default_currency": "INR",
+#     "country": "India"
+#   }
+# }
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all companies
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/companies
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific company
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/companies/Acme%20Corporation
+
+# Note: Company names with spaces need to be URL encoded (e.g., "Acme Corporation" becomes "Acme%20Corporation")
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a company
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/companies/Acme%20Corporation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "default_currency": "USD",
+    "country": "United States"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a company
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/companies/Acme%20Corporation
+
+# Expected Response:
+# {"data":"ok"}
+
+################################################################################
 #                            LOAN CATEGORY                                    #
 ################################################################################
 
