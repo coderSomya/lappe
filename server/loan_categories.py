@@ -3,7 +3,7 @@ Loan Categories API Module
 Handles all CRUD operations for Loan Categories
 """
 from flask import Blueprint, request, jsonify
-from utils import make_frappe_request, url_encode_doctype
+from utils import make_frappe_request, url_encode_doctype, url_encode_docname, build_query_string
 
 loan_categories_bp = Blueprint('loan_categories', __name__)
 DOCTYPE = "Loan Category"
@@ -71,11 +71,7 @@ def get_loan_categories():
         params['limit_page_length'] = request.args.get('limit_page_length')
     
     # Build endpoint with query string
-    endpoint = BASE_ENDPOINT
-    if params:
-        query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
-        endpoint = f"{endpoint}?{query_string}"
-    
+    endpoint = BASE_ENDPOINT + build_query_string(params)
     status_code, response_data = make_frappe_request('GET', endpoint)
     
     return jsonify(response_data), status_code
@@ -86,7 +82,8 @@ def get_loan_category(category_name: str):
     """
     Get a specific loan category by name/code
     """
-    endpoint = f'{BASE_ENDPOINT}/{category_name}'
+    encoded_name = url_encode_docname(category_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('GET', endpoint)
     
     return jsonify(response_data), status_code
@@ -104,7 +101,8 @@ def update_loan_category(category_name: str):
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
     
-    endpoint = f'{BASE_ENDPOINT}/{category_name}'
+    encoded_name = url_encode_docname(category_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('PUT', endpoint, data)
     
     return jsonify(response_data), status_code
@@ -115,7 +113,8 @@ def delete_loan_category(category_name: str):
     """
     Delete a loan category
     """
-    endpoint = f'{BASE_ENDPOINT}/{category_name}'
+    encoded_name = url_encode_docname(category_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('DELETE', endpoint)
     
     return jsonify(response_data), status_code

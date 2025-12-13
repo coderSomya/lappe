@@ -73,3 +73,6 @@ Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'tim
 2025-12-12 00:23:29,875 ERROR frappe New Exception collected in error log
 Site: lending.localhost
 Form Dict: {'chart_name': 'New Loans', 'refresh': '1', 'time_interval': '', 'timespan': '', 'from_date': '', 'to_date': '', 'heatmap_year': '', 'cmd': 'frappe.desk.doctype.dashboard_chart.dashboard_chart.get'}
+2025-12-13 12:56:38,030 ERROR frappe New Exception collected in error log
+Site: lending.localhost
+Form Dict: {}

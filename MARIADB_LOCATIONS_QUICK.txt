@@ -1,0 +1,58 @@
+╔════════════════════════════════════════════════════════════════╗
+║              MARIADB LOCATIONS - QUICK REFERENCE              ║
+╚════════════════════════════════════════════════════════════════╝
+
+📍 MAIN LOCATIONS:
+
+1. Configuration File:
+   /opt/homebrew/etc/my.cnf
+
+2. Data Directory (All Databases):
+   /opt/homebrew/var/mysql/
+
+3. Your Frappe Database:
+   /opt/homebrew/var/mysql/_af6374d4ed93f504/
+
+4. MariaDB Installation:
+   /opt/homebrew/opt/mariadb
+
+5. Socket File:
+   /tmp/mysql.sock
+
+6. Error Log:
+   /opt/homebrew/var/mysql/pros-MacBook-Pro.local.err
+
+7. PID File:
+   /opt/homebrew/var/mysql/pros-MacBook-Pro.local.pid
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 CONNECTION DETAILS:
+
+Database Name: _af6374d4ed93f504
+Database User: _af6374d4ed93f504
+Database Password: zTmiKxBrhzpoetXi
+Host: 127.0.0.1
+Port: 3306
+Socket: /tmp/mysql.sock
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔍 QUICK COMMANDS:
+
+View config:
+  cat /opt/homebrew/etc/my.cnf
+
+List databases:
+  ls -la /opt/homebrew/var/mysql/
+
+View your database:
+  ls -la /opt/homebrew/var/mysql/_af6374d4ed93f504/
+
+Connect to database:
+  mysql -u _af6374d4ed93f504 -p'zTmiKxBrhzpoetXi' _af6374d4ed93f504
+
+Backup database:
+  mysqldump -u _af6374d4ed93f504 -p'zTmiKxBrhzpoetXi' _af6374d4ed93f504 > backup.sql
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

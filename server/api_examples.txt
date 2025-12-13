@@ -102,12 +102,14 @@ curl http://localhost:5001/api/loan-products
 # ────────────────────────────────────────────────────────────────────────────
 # GET ONE - Get a specific loan product
 # ────────────────────────────────────────────────────────────────────────────
-curl http://localhost:5001/api/loan-products/PL-001
+# Note: Replace LP-001 with your actual loan product name
+curl http://localhost:5001/api/loan-products/LP-001
 
 # ────────────────────────────────────────────────────────────────────────────
 # UPDATE - Update a loan product
 # ────────────────────────────────────────────────────────────────────────────
-curl -X PUT http://localhost:5001/api/loan-products/PL-001 \
+# Note: Replace LP-001 with your actual loan product name
+curl -X PUT http://localhost:5001/api/loan-products/LP-001 \
   -H "Content-Type: application/json" \
   -d '{
     "rate_of_interest": 13.0,
@@ -117,7 +119,8 @@ curl -X PUT http://localhost:5001/api/loan-products/PL-001 \
 # ────────────────────────────────────────────────────────────────────────────
 # DELETE - Delete a loan product
 # ────────────────────────────────────────────────────────────────────────────
-curl -X DELETE http://localhost:5001/api/loan-products/PL-001
+# Note: Replace LP-001 with your actual loan product name
+curl -X DELETE http://localhost:5001/api/loan-products/LP-001
 
 ################################################################################
 #                         LOAN APPLICATION                                    #
@@ -301,7 +304,7 @@ curl -X DELETE http://localhost:5001/api/loan-restructures/LOAN-RES-2025-00001
 curl -X POST http://localhost:5001/api/loan-disbursements \
   -H "Content-Type: application/json" \
   -d '{
-    "against_loan": "LOAN-001",
+    "against_loan": "ACC-LOAN-2025-00001",
     "disbursement_date": "2025-12-12",
     "disbursed_amount": 100000,
     "bank_account": "BANK-001",
@@ -314,8 +317,8 @@ curl -X POST http://localhost:5001/api/loan-disbursements \
     "reference_date": "2025-12-12",
     "reference_number": "REF-12345",
     "cost_center": "CC-001",
-    "disbursement_account": "ACC-001",
-    "refund_account": "ACC-002",
+    "disbursement_account": "Disbursement Account - _TC",
+    "refund_account": "Refund Account - _TC",
     "mode_of_payment": "Bank Transfer",
     "broken_period_interest_days": 0,
     "days_past_due": 0,
@@ -335,6 +338,517 @@ curl -X POST http://localhost:5001/api/loan-disbursements \
       }
     ]
   }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan disbursements
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-disbursements
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan disbursement
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-disbursements/LM-DIS-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan disbursement
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-disbursements/LM-DIS-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reference_number": "REF-UPDATED-12345",
+    "disbursed_amount": 110000
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan disbursement
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-disbursements/LM-DIS-00001
+
+################################################################################
+#                      LOAN SECURITY DEPOSIT                                  #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new loan security deposit
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/loan-security-deposits \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan": "ACC-LOAN-2025-00001",
+    "loan_disbursement": "LM-DIS-00001",
+    "deposit_date": "2025-12-12",
+    "deposit_amount": 10000,
+    "allocated_date": "2025-12-15",
+    "allocated_amount": 5000,
+    "available_amount": 5000,
+    "refund_date": "2025-12-20",
+    "refund_amount": 2000
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan security deposits
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-security-deposits
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan security deposit
+# ────────────────────────────────────────────────────────────────────────────
+# Note: Replace LSD-00001 with your actual document name (may be hash-based like 8t0f0dhtbv)
+curl http://localhost:5001/api/loan-security-deposits/LSD-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan security deposit
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-security-deposits/LSD-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "allocated_amount": 6000,
+    "available_amount": 4000
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan security deposit
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-security-deposits/LSD-00001
+
+################################################################################
+#                      LOAN REPAYMENT SCHEDULE                                #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new loan repayment schedule
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/loan-repayment-schedules \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan": "ACC-LOAN-2025-00001",
+    "loan_disbursement": "LM-DIS-00001",
+    "posting_date": "2025-12-13 10:00:00",
+    "repayment_start_date": "2026-01-15",
+    "repayment_frequency": "Monthly",
+    "repayment_method": "Repay Over Number of Periods",
+    "repayment_periods": 24,
+    "monthly_repayment_amount": 10000,
+    "rate_of_interest": 12.5,
+    "repayment_schedule_type": "Monthly as per repayment start date",
+    "repayment_date_on": "End of the current month",
+    "maturity_date": "2027-01-15",
+    "loan_amount": 200000,
+    "disbursed_amount": 200000,
+    "current_principal_amount": 200000,
+    "broken_period_interest": 0,
+    "broken_period_interest_days": 0,
+    "adjusted_interest": 0,
+    "moratorium_type": "",
+    "moratorium_tenure": 0,
+    "moratorium_end_date": null,
+    "treatment_of_interest": "Capitalize",
+    "status": "Draft"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan repayment schedules
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-repayment-schedules
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan repayment schedule
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-repayment-schedules/LN-RS-2025-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan repayment schedule
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-repayment-schedules/LN-RS-2025-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "monthly_repayment_amount": 11000,
+    "status": "Active"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan repayment schedule
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-repayment-schedules/LN-RS-2025-00001
+
+################################################################################
+#                      LOAN INTEREST ACCRUAL                                  #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/loan-interest-accruals \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan": "ACC-LOAN-2025-00001",
+    "posting_date": "2025-12-13 10:00:00",
+    "start_date": "2025-12-01 00:00:00",
+    "accrual_date": "2025-12-13",
+    "base_amount": 200000,
+    "interest_amount": 2083.33,
+    "additional_interest_amount": 0,
+    "rate_of_interest": 12.5,
+    "interest_type": "Normal Interest",
+    "accrual_type": "Regular",
+    "loan_disbursement": "LM-DIS-00001",
+    "loan_repayment_schedule": "LN-RS-2025-00001",
+    "loan_demand": "LM-LD-00001",
+    "process_loan_interest_accrual": "LM-PLA-00001",
+    "cost_center": "Main - _TC",
+    "is_npa": 0,
+    "unmark_npa": 0
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan interest accruals
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-interest-accruals
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-interest-accruals/LM-LIA-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-interest-accruals/LM-LIA-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interest_amount": 2100.00,
+    "is_npa": 0
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-interest-accruals/LM-LIA-00001
+
+################################################################################
+#                            LOAN DEMAND                                       #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/loan-demands \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan": "ACC-LOAN-2025-00001",
+    "demand_date": "2025-12-13 10:00:00",
+    "posting_date": "2025-12-13 10:00:00",
+    "demand_type": "EMI",
+    "demand_subtype": "Principal and Interest",
+    "demand_amount": 10000,
+    "paid_amount": 0,
+    "waived_amount": 0,
+    "outstanding_amount": 10000,
+    "loan_disbursement": "LM-DIS-00001",
+    "loan_repayment_schedule": "LN-RS-2025-00001",
+    "repayment_schedule_detail": "Installment 1",
+    "loan_repayment": "LM-REP-00001",
+    "sales_invoice": null,
+    "invoice_date": null,
+    "process_loan_demand": "LM-PLD-00001",
+    "cost_center": "Main - _TC",
+    "loan_partner": null,
+    "partner_share": 0,
+    "partner_share_allocated": 0
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan demands
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-demands
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-demands/LM-LD-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-demands/LM-LD-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paid_amount": 5000,
+    "outstanding_amount": 5000
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-demands/LM-LD-00001
+
+################################################################################
+#                            LOAN REPAYMENT                                   #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new loan repayment
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/loan-repayments \
+  -H "Content-Type: application/json" \
+  -d '{
+    "against_loan": "ACC-LOAN-2025-00001",
+    "posting_date": "2025-12-13 10:00:00",
+    "value_date": "2025-12-13 10:00:00",
+    "repayment_type": "Normal Repayment",
+    "amount_paid": 10000,
+    "loan_disbursement": "LM-DIS-00001",
+    "loan_restructure": null,
+    "loan_adjustment": null,
+    "due_date": "2026-01-15",
+    "pending_principal_amount": 190000,
+    "payable_principal_amount": 9000,
+    "interest_payable": 1000,
+    "penalty_amount": 0,
+    "payable_amount": 10000,
+    "total_charges_payable": 0,
+    "shortfall_amount": 0,
+    "principal_amount_paid": 9000,
+    "total_interest_paid": 1000,
+    "total_penalty_paid": 0,
+    "total_charges_paid": 0,
+    "unbooked_interest_paid": 0,
+    "unbooked_penalty_paid": 0,
+    "excess_amount": 0,
+    "reference_number": "REF-REP-001",
+    "reference_date": "2025-12-13",
+    "mode_of_payment": "Bank Transfer",
+    "bank_account": "BANK-001",
+    "payment_account": "Payment Account - _TC",
+    "loan_account": "Loan Account - _TC",
+    "penalty_income_account": "Penalty Income Account - _TC",
+    "cost_center": "Main - _TC",
+    "clearance_date": null,
+    "days_past_due": 0,
+    "is_backdated": 0,
+    "is_npa": 0,
+    "is_write_off_waiver": 0,
+    "manual_remarks": "Normal monthly repayment",
+    "repayment_details": [],
+    "payable_charges": [],
+    "prepayment_charges": []
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all loan repayments
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/loan-repayments
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific loan repayment
+# ────────────────────────────────────────────────────────────────────────────
+# Note: Replace LM-REP-00001 with your actual document name (may be LM-REP-0001)
+curl http://localhost:5001/api/loan-repayments/LM-REP-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a loan repayment
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/loan-repayments/LM-REP-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount_paid": 11000,
+    "manual_remarks": "Updated repayment amount"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a loan repayment
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/loan-repayments/LM-REP-00001
+
+################################################################################
+#                    PROCESS LOAN SECURITY SHORTFALL                          #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new process loan security shortfall
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/process-loan-security-shortfall \
+  -H "Content-Type: application/json" \
+  -d '{
+    "update_time": "2025-12-13 10:00:00"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all process loan security shortfall records
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-security-shortfall
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific process loan security shortfall
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-security-shortfall/LM-PLS-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a process loan security shortfall
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/process-loan-security-shortfall/LM-PLS-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "update_time": "2025-12-13 11:00:00"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a process loan security shortfall
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/process-loan-security-shortfall/LM-PLS-00001
+
+################################################################################
+#                    PROCESS LOAN INTEREST ACCRUAL                             #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new process loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/process-loan-interest-accrual \
+  -H "Content-Type: application/json" \
+  -d '{
+    "posting_date": "2025-12-13",
+    "company": "Your Company",
+    "loan_product": "PL-001",
+    "loan": "ACC-LOAN-2025-00001",
+    "loan_disbursement": "LM-DIS-00001",
+    "accrual_type": "Regular"
+  }'
+
+# Note: accrual_type options: Regular, Repayment, Disbursement, Credit Adjustment, Debit Adjustment, Refund
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all process loan interest accrual records
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-interest-accrual
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific process loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-interest-accrual/LM-PLA-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a process loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/process-loan-interest-accrual/LM-PLA-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "posting_date": "2025-12-14",
+    "company": "Your Company"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a process loan interest accrual
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/process-loan-interest-accrual/LM-PLA-00001
+
+################################################################################
+#                         PROCESS LOAN DEMAND                                  #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new process loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/process-loan-demand \
+  -H "Content-Type: application/json" \
+  -d '{
+    "posting_date": "2025-12-13",
+    "loan_product": "PL-001",
+    "loan": "ACC-LOAN-2025-00001",
+    "loan_disbursement": "LM-DIS-00001"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all process loan demand records
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-demand
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific process loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-demand/LM-PLD-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a process loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X PUT http://localhost:5001/api/process-loan-demand/LM-PLD-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "posting_date": "2025-12-14",
+    "loan_product": "PL-002"
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a process loan demand
+# ────────────────────────────────────────────────────────────────────────────
+curl -X DELETE http://localhost:5001/api/process-loan-demand/LM-PLD-00001
+
+################################################################################
+#                      PROCESS LOAN CLASSIFICATION                             #
+################################################################################
+
+# ────────────────────────────────────────────────────────────────────────────
+# CREATE - Create a new process loan classification
+# ────────────────────────────────────────────────────────────────────────────
+curl -X POST http://localhost:5001/api/process-loan-classification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "posting_date": "2025-12-13",
+    "loan_product": "PL-001",
+    "loan": "ACC-LOAN-2025-00001",
+    "loan_disbursement": "LM-DIS-00001",
+    "payment_reference": "LR-00001",
+    "is_backdated": 0,
+    "force_update_dpd_in_loan": 0
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ALL - Get all process loan classification records
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-classification
+
+# ────────────────────────────────────────────────────────────────────────────
+# GET ONE - Get a specific process loan classification
+# ────────────────────────────────────────────────────────────────────────────
+curl http://localhost:5001/api/process-loan-classification/LM-ACC-00001
+
+# ────────────────────────────────────────────────────────────────────────────
+# UPDATE - Update a process loan classification
+# ────────────────────────────────────────────────────────────────────────────
+# Note: Cannot update posting_date after submission. Use cancel first if needed.
+curl -X PUT http://localhost:5001/api/process-loan-classification/LM-ACC-00001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "force_update_dpd_in_loan": 1
+  }'
+
+# ────────────────────────────────────────────────────────────────────────────
+# CANCEL - Cancel a submitted process loan classification
+# ────────────────────────────────────────────────────────────────────────────
+# Required before deleting or updating restricted fields on submitted documents
+# Note: Only submitted documents (docstatus=1) can be cancelled.
+# Draft documents (docstatus=0) don't need cancellation.
+# 
+# First, check document status:
+curl http://localhost:5001/api/process-loan-classification/LM-ACC-00001
+# 
+# If docstatus=1 (submitted), then cancel:
+curl -X POST http://localhost:5001/api/process-loan-classification/LM-ACC-00001/cancel
+#
+# Expected Response for submitted document:
+# {"message": {...}, "data": {...}}
+#
+# Expected Response for draft document:
+# {"message": "Document is already in draft status", "docstatus": 0, ...}
+#
+# Expected Response for already cancelled document:
+# {"message": "Document is already cancelled", "docstatus": 2, ...}
+
+# ────────────────────────────────────────────────────────────────────────────
+# DELETE - Delete a process loan classification
+# ────────────────────────────────────────────────────────────────────────────
+# Note: If document is submitted, it will be automatically cancelled first
+curl -X DELETE http://localhost:5001/api/process-loan-classification/LM-ACC-00001
 
 ################################################################################
 #                              END OF FILE                                    #

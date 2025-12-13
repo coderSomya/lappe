@@ -3,7 +3,7 @@ Loan Repayment Schedules API Module
 Handles all CRUD operations for Loan Repayment Schedules
 """
 from flask import Blueprint, request, jsonify
-from utils import make_frappe_request, url_encode_doctype
+from utils import make_frappe_request, url_encode_doctype, url_encode_docname, build_query_string
 
 loan_repayment_schedules_bp = Blueprint('loan_repayment_schedules', __name__)
 DOCTYPE = "Loan Repayment Schedule"
@@ -34,11 +34,7 @@ def get_loan_repayment_schedules():
     if request.args.get('limit_page_length'):
         params['limit_page_length'] = request.args.get('limit_page_length')
     
-    endpoint = BASE_ENDPOINT
-    if params:
-        query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
-        endpoint = f"{endpoint}?{query_string}"
-    
+    endpoint = BASE_ENDPOINT + build_query_string(params)
     status_code, response_data = make_frappe_request('GET', endpoint)
     return jsonify(response_data), status_code
 
@@ -46,7 +42,8 @@ def get_loan_repayment_schedules():
 @loan_repayment_schedules_bp.route('/api/loan-repayment-schedules/<schedule_name>', methods=['GET'])
 def get_loan_repayment_schedule(schedule_name: str):
     """Get a specific loan repayment schedule"""
-    endpoint = f'{BASE_ENDPOINT}/{schedule_name}'
+    encoded_name = url_encode_docname(schedule_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('GET', endpoint)
     return jsonify(response_data), status_code
 
@@ -57,7 +54,8 @@ def update_loan_repayment_schedule(schedule_name: str):
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
-    endpoint = f'{BASE_ENDPOINT}/{schedule_name}'
+    encoded_name = url_encode_docname(schedule_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('PUT', endpoint, data)
     return jsonify(response_data), status_code
 
@@ -65,7 +63,8 @@ def update_loan_repayment_schedule(schedule_name: str):
 @loan_repayment_schedules_bp.route('/api/loan-repayment-schedules/<schedule_name>', methods=['DELETE'])
 def delete_loan_repayment_schedule(schedule_name: str):
     """Delete a loan repayment schedule"""
-    endpoint = f'{BASE_ENDPOINT}/{schedule_name}'
+    encoded_name = url_encode_docname(schedule_name)
+    endpoint = f'{BASE_ENDPOINT}/{encoded_name}'
     status_code, response_data = make_frappe_request('DELETE', endpoint)
     return jsonify(response_data), status_code
 
