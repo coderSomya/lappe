@@ -8,9 +8,9 @@ from typing import Dict, Optional, Tuple
 
 # Frappe Configuration
 FRAPPE_BASE_URL = os.getenv('FRAPPE_BASE_URL', 'http://127.0.0.1:8000')
-FRAPPE_SITE_NAME = os.getenv('FRAPPE_SITE_NAME', 'lending.localhost')
-FRAPPE_API_KEY = os.getenv('FRAPPE_API_KEY', '64726967de821d4')
-FRAPPE_API_SECRET = os.getenv('FRAPPE_API_SECRET', '18fe12924de8f23')
+FRAPPE_SITE_NAME = os.getenv('FRAPPE_SITE_NAME', 'mysite.local')
+FRAPPE_API_KEY = os.getenv('FRAPPE_API_KEY', '3c03942a9cf7805')
+FRAPPE_API_SECRET = os.getenv('FRAPPE_API_SECRET', '38f33e226e0532e')
 
 
 def get_frappe_headers() -> Dict[str, str]:
@@ -86,12 +86,17 @@ def url_encode_docname(docname: str) -> str:
 
 
 def build_query_string(params: Dict) -> str:
-    """
-    Build properly URL-encoded query string from parameters
+    """Build a URL-encoded query string from parameters.
+
+    Important: Flask's request.args values may already contain percent-escapes
+    (for example when upstream clients encode JSON strings). If we encode '%'
+    again here, sequences like '%3D' become '%253D' and Frappe will receive
+    '%3D' literally after decoding once, breaking filters.
     """
     if not params:
         return ''
-    return '?' + urlencode(params)
+    # Allow existing percent-escapes to pass through to avoid double-encoding.
+    return '?' + urlencode(params, safe='%')
 
 
 def cancel_document(doctype: str, docname: str) -> Tuple[int, Dict]:

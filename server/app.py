@@ -22,6 +22,7 @@ from process_loan_demand import process_loan_demand_bp
 from process_loan_classification import process_loan_classification_bp
 from users import users_bp
 from companies import companies_bp
+from customers import customers_bp
 
 app = Flask(__name__)
 
@@ -43,6 +44,7 @@ app.register_blueprint(process_loan_demand_bp)
 app.register_blueprint(process_loan_classification_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(companies_bp)
+app.register_blueprint(customers_bp)
 
 
 @app.route('/health', methods=['GET'])
@@ -68,7 +70,8 @@ def health_check():
             'Process Loan Demand',
             'Process Loan Classification',
             'Users',
-            'Companies'
+            'Companies',
+            'Customers'
         ]
     }), 200
 
@@ -79,7 +82,7 @@ if __name__ == '__main__':
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     print(f"🚀 Starting Loan Management API Gateway on port {port}")
-    print(f"📡 Registered {17} modules")
+    print(f"📡 Registered {18} modules")
     print(f"✅ Server ready at http://localhost:{port}")
     
     app.run(host='0.0.0.0', port=port, debug=debug)
