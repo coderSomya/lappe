@@ -23,6 +23,8 @@ from process_loan_classification import process_loan_classification_bp
 from users import users_bp
 from companies import companies_bp
 from customers import customers_bp
+from accounts import accounts_bp
+from proxy import proxy_bp
 
 app = Flask(__name__)
 
@@ -45,6 +47,9 @@ app.register_blueprint(process_loan_classification_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(companies_bp)
 app.register_blueprint(customers_bp)
+app.register_blueprint(accounts_bp)
+app.register_blueprint(proxy_bp)
+
 
 
 @app.route('/health', methods=['GET'])
@@ -71,7 +76,8 @@ def health_check():
             'Process Loan Classification',
             'Users',
             'Companies',
-            'Customers'
+            'Customers',
+            'Accounts'
         ]
     }), 200
 

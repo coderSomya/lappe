@@ -50,7 +50,7 @@ def get_loan(loan_name: str):
 
 @loans_bp.route('/api/loans/<loan_name>', methods=['PUT'])
 def update_loan(loan_name: str):
-    """Update a loan"""
+    """Update a specific loan"""
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Request body is required'}), 400
